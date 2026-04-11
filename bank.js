@@ -56,7 +56,7 @@ while (true)   {
         } 
 
         if (solicitacao == "3") {
-            console.log("=== EXTRATO ===")
+            console.log("========== EXTRATO ==========")
             for (let linha of extrato) {
                 console.log(linha);
             }
