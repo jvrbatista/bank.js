@@ -2,7 +2,7 @@ import readline from 'readline/promises';
 import { stdin as input, stdout as output } from 'process';
 const rl = readline.createInterface({ input, output });
 
-//variaveis
+//variveis para armazenamento de dados dos cliente e para análise de fraude.
 let listaCadastro = [];
 let pontosSuspeita = 0;
 let saquesSeguidos = 0;
@@ -16,8 +16,8 @@ function depositar (saldoCLiente, valorDepositar) {
 function sacar (saldoCLiente, valorSaque) {
     if (saldoCLiente > valorSaque) {
         return saldoCLiente - valorSaque;
-    }
-
+    } 
+    
     else {
         console.log("O saldo é insuficiente para esse valor.")
         return saldoCLiente;
@@ -29,7 +29,7 @@ async function telaAutenticacao () {
     console.log("\nOlá cliente do BANK, Seja bem-vindo!");
 
     while (true ) {
-    console.log("============ CADASTRO DO BANCO BANK ============")
+    console.log("\n============ CADASTRO DO BANCO BANK ============")
     let logout = await rl.question("1-Cadastrar\n2-Login\n\nQual serviço você deseja hoje?: ")
         if (logout == "1") {
             let nomeCliente = await rl.question("Cadastre o seu nome de usuário: ");
@@ -59,6 +59,10 @@ async function telaAutenticacao () {
                 } else {
                     console.log("Usuário ou senha incorretos.")
                 }
+        }
+
+        if(!["1","2"].includes(logout)) {
+            console.log("Resposta inválida! Escolha uma das opções acima.");
         }
     }
 }
@@ -100,8 +104,8 @@ async function telaAutenticacao () {
         } 
 
         if (!["1","2","3","4"].includes(solicitacao)) {
-            console.log("Resposta inválida! Sistema finalizado.")
-            break
+            console.log("Resposta inválida! Voltando para tela inicial.")
+            await telaAutenticacao();
         }
 
         if (saquesSeguidos > 3) {
