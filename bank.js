@@ -8,7 +8,7 @@ let usuarioCadastrado = null;
 
 //função para cliente depositar dinheiro na conta
 function depositar (saldoCLiente, valorDepositar) {
-   return saldoCLiente + valorDepositar;
+return saldoCLiente + valorDepositar;
 };
 //função para cliente sacar dinheiro da conta
 function sacar (saldoCLiente, valorSaque) {
