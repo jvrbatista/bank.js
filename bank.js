@@ -4,8 +4,6 @@ const rl = readline.createInterface({ input, output });
 
 //variveis para armazenamento de dados dos cliente e para análise de fraude.
 let listaCadastro = [];
-let pontosSuspeita = 0;
-let saquesSeguidos = 0;
 let usuarioCadastrado = null;
 
 //função para cliente depositar dinheiro na conta
@@ -14,7 +12,7 @@ function depositar (saldoCLiente, valorDepositar) {
 };
 //função para cliente sacar dinheiro da conta
 function sacar (saldoCLiente, valorSaque) {
-    if (saldoCLiente > valorSaque) {
+    if (saldoCLiente >= valorSaque) {
         return saldoCLiente - valorSaque;
     } 
     
@@ -39,6 +37,8 @@ async function telaAutenticacao () {
                 senha: senhaCliente,
                 saldoCliente: 0,
                 extrato: [],
+                pontosSuspeita: 0,
+                saquesSeguidos: 0,
                 cartaoBloqueado: false                    
             })}
 
@@ -75,12 +75,12 @@ async function telaAutenticacao () {
         if (solicitacao == "1") {
             let valorSaque = Number(await rl.question("Qual valor deseja sacar? R$"));
                 if (valorSaque > 1000) {
-                pontosSuspeita += 1;
+                usuarioCadastrado.pontosSuspeita += 1;
                 }
             usuarioCadastrado.saldoCliente = sacar(usuarioCadastrado.saldoCliente, valorSaque);
             usuarioCadastrado.extrato.push(`Saque de R$${valorSaque} - Saldo: R$${usuarioCadastrado.saldoCliente}`);
             console.log(`Saldo atual: R$${usuarioCadastrado.saldoCliente}`);
-            saquesSeguidos += 1;
+            usuarioCadastrado.saquesSeguidos += 1;
         }
 
         if (solicitacao == "2") {
@@ -88,6 +88,7 @@ async function telaAutenticacao () {
             usuarioCadastrado.saldoCliente = depositar(usuarioCadastrado.saldoCliente, valorDepositar);
             usuarioCadastrado.extrato.push(`Depósito de R$${valorDepositar} - Saldo: R$${usuarioCadastrado.saldoCliente}`)
             console.log(`Saldo atual: R$${usuarioCadastrado.saldoCliente}`)
+            usuarioCadastrado.saquesSeguidos = 0;
         } 
 
         if (solicitacao == "3") {
@@ -106,13 +107,14 @@ async function telaAutenticacao () {
         if (!["1","2","3","4"].includes(solicitacao)) {
             console.log("Resposta inválida! Voltando para tela inicial.")
             await telaAutenticacao();
+            continue;
         }
 
-        if (saquesSeguidos > 3) {
-            pontosSuspeita += 1
+        if (usuarioCadastrado.saquesSeguidos > 3) {
+            usuarioCadastrado.pontosSuspeita += 1
         }
 
-        if (pontosSuspeita >= 2) {
+        if (usuarioCadastrado.pontosSuspeita >= 2) {
             usuarioCadastrado.cartaoBloqueado = true
             console.log("Muitos saques seguidos. Seu cartão foi bloqueado.")
             await telaAutenticacao();
@@ -120,4 +122,3 @@ async function telaAutenticacao () {
     }
 
 rl.close();
-
