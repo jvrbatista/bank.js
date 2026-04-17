@@ -2,15 +2,14 @@ import readline from 'readline/promises';
 import { stdin as input, stdout as output } from 'process';
 const rl = readline.createInterface({ input, output });
 
-//variveis para armazenamento de dados dos cliente e para análise de fraude.
 let listaCadastro = [];
 let usuarioCadastrado = null;
 
-//função para cliente depositar dinheiro na conta
+
 function depositar (saldoCLiente, valorDepositar) {
 return saldoCLiente + valorDepositar;
 };
-//função para cliente sacar dinheiro da conta
+
 function sacar (saldoCLiente, valorSaque) {
     if (saldoCLiente >= valorSaque) {
         return saldoCLiente - valorSaque;
@@ -22,7 +21,6 @@ function sacar (saldoCLiente, valorSaque) {
     }
 };
 
-//Tela de cadastro para usuário
 async function telaAutenticacao () {
     console.log("\nOlá cliente do BANK, Seja bem-vindo!");
 
@@ -49,10 +47,8 @@ async function telaAutenticacao () {
             usuarioCadastrado = listaCadastro.find(dadoscadastrais => dadoscadastrais.nome === nomeCadastro && dadoscadastrais.senha === senhaCadastro);
                 if (usuarioCadastrado) {
                     if (usuarioCadastrado.cartaoBloqueado === true) {
-                        //Se cartão estiver bloqueado, o sistema bancário não funciona
                         console.log("Cartão Bloqueado. Ligue para central de atendimento.")
-                    } else{
-                        //Se não estiver bloqueado, boas vindas ao usuário
+                    } else{      
                     console.log(`Bem-vindo, ${usuarioCadastrado.nome}!`);
                     break
                     }
@@ -67,7 +63,6 @@ async function telaAutenticacao () {
     }
 }
     await telaAutenticacao();
-    //Menu após login
     while (true)   {
     console.log("\n========== MENU ==========");
     let solicitacao = await rl.question("1-Sacar\n2-Depositar\n3-Verificar Extrato\n4-Voltar ao menu\n\nQual serviço você deseja hoje?: ")
