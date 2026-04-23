@@ -29,23 +29,21 @@ async function telaAutenticacao () {
     let logout = await rl.question("1-Cadastrar\n2-Login\n\nQual serviço você deseja hoje?: ")
         if (logout == "1") {
             let tipoDeConta;
-                while (true) {
                 let escolhaConta = await rl.question("\n========== TIPO DE CONTA ==========\n1-Corrente\n2-Poupança\n\nQual tipo de conta você vai criar? ");  
                     if (escolhaConta == "1") {
                         tipoDeConta = "Corrente";
-                        break
                     }
                     if (escolhaConta == "2") {
                         tipoDeConta = "Poupança";
-                        break
                     }
                     if (!["1","2"].includes(escolhaConta)) {
                         console.log("Não foi possível realizar o seu cadastro. Opção invállida!");
-                    }}     
+                        continue
+                    }  
             let CpfCliente = await rl.question("Digite seu CPF: ");
                 const cpfduplicado = listaCadastro.find(usuario => usuario.cpf === CpfCliente)
                     if (cpfduplicado){
-                        console.log("CPF já cadastrado!");
+                        console.log("Não foi possível realizar o seu cadastro. CPF já cadastrado!");
                         continue
                     }
             let nomeCliente = await rl.question("Cadastre o seu nome de usuário: ");
