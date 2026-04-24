@@ -54,7 +54,6 @@ async function telaAutenticacao () {
             let senhaCliente = await rl.question("Cadastre a sua senha: ");
 
             listaCadastro.push({
-                numeroConta: listaCadastro.length + 1,
                 conta: tipoDeConta,
                 cpf: CpfCliente,
                 nome: nomeCliente,
@@ -94,7 +93,7 @@ async function telaAutenticacao () {
     await telaAutenticacao();
     while (true)   {
     console.log("\n========== MENU ==========");
-    let solicitacao = await rl.question("1-Sacar\n2-Depositar\n3-Verificar Extrato\n4-Consultar saldo\n5-Voltar ao menu\n\nQual serviço você deseja hoje?: ")
+    let solicitacao = await rl.question("1-Sacar\n2-Depositar\n3-Tranferência\n4-Verificar Extrato\n5-Consultar saldo\n6-Voltar ao menu\n\nQual serviço você deseja hoje?: ")
 
         if (solicitacao == "1") {
             let valorSaque = Number(await rl.question("Qual valor deseja sacar? R$"));
@@ -121,26 +120,46 @@ async function telaAutenticacao () {
             usuarioCadastrado.extrato.push(`Depósito de R$${valorDepositar} - Saldo: R$${usuarioCadastrado.saldoCliente}`)
             usuarioCadastrado.saquesSeguidos = 0;
         } 
+    
+        if (solicitacao == "3") {          
+            let cpfDigitado = await rl.question("Digite o CPF do recebedor: ")
+            let contaDestino = listaCadastro.find(buscaConta => buscaConta.cpf == cpfDigitado)
+                if (contaDestino) {
+                    let valorTransferencia = Number(await rl.question("Insira o valor da transferência: "));
+                        if (usuarioCadastrado.saldoCliente >= valorTransferencia) {
+                            console.log("Saldo suficiente!");
+                            usuarioCadastrado.saldoCliente -= valorTransferencia
+                                usuarioCadastrado.extrato.push(`${usuarioCadastrado.nome} você efetuou uma transferência para o ${contaDestino.nome}`);
+                            contaDestino.saldoCliente += valorTransferencia
+                                contaDestino.extrato.push(`Você recebeu R$${valorTransferencia} de ${usuarioCadastrado.nome}`);
+                        } else {
+                            console.log("Saldo insulficiente para transferência!")
+                        }
+                } else {
+                    console.log("CPF inválido. Conta não consta em cadastro!");
+                }
+        }
 
-        if (solicitacao == "3") {
+        if (solicitacao == "4") {
             console.log("========== EXTRATO ==========")
             for (let linha of usuarioCadastrado.extrato) {
                 console.log(linha);
             }
         }
 
-        if (solicitacao == "4") {
+        if (solicitacao == "5") {
             console.log(`O seu saldo atual é R$${usuarioCadastrado.saldoCliente}`);
+            console.log(usuarioCadastrado)
             continue;
         }
 
-        if (solicitacao == "5") {
+        if (solicitacao == "6") {
             console.log(`Sistema Finalizado. Até mais ${usuarioCadastrado.nome}`);
             usuarioCadastrado = null;
             await telaAutenticacao();
         } 
 
-        if (!["1","2","3","4","5"].includes(solicitacao)) {
+        if (!["1","2","3","4","5","6"].includes(solicitacao)) {
             console.log("Resposta inválida! Voltando para tela inicial.")
             await telaAutenticacao();
             continue;
