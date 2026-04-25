@@ -6,7 +6,7 @@ const rl = readline.createInterface({ input, output });
 
 let contas = [];
 let usuarioLogado = null;
-
+ 
 function carregarContas() {
     try {
         const texto = fs.readFileSync('contas.json', 'utf-8');
@@ -27,7 +27,7 @@ function dataHora() {
 
 
 function depositar (saldo, valorDepositar) {
-return saldo + valorDepositar;
+    return saldo + valorDepositar;
 };
 
 function sacar (saldo, valorSaque) {
@@ -40,7 +40,7 @@ function sacar (saldo, valorSaque) {
         return saldo;
     }
 };
-carregarContas()
+contas = carregarContas()
 async function telaAutenticacao () {
     console.log("\nOlá cliente do BANK, Seja bem-vindo!");
 
@@ -219,5 +219,4 @@ async function telaAutenticacao () {
             await telaAutenticacao();
         }
     }
-
 rl.close();
