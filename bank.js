@@ -1,9 +1,29 @@
+import fs from 'fs';
 import readline from 'readline/promises';
 import { stdin as input, stdout as output } from 'process';
 const rl = readline.createInterface({ input, output });
 
+
 let contas = [];
 let usuarioLogado = null;
+
+function carregarContas() {
+    try {
+        const texto = fs.readFileSync('contas.json', 'utf-8');
+    return JSON.parse(texto);
+    } catch (error) {
+        return []
+    }
+};
+
+function salvarConta() {
+    fs.writeFileSync('contas.json', JSON.stringify(contas))
+}
+
+function dataHora() {
+    const agora = new Date()
+    return `${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR')}`
+}
 
 
 function depositar (saldo, valorDepositar) {
@@ -20,7 +40,7 @@ function sacar (saldo, valorSaque) {
         return saldo;
     }
 };
-
+carregarContas()
 async function telaAutenticacao () {
     console.log("\nOlá cliente do BANK, Seja bem-vindo!");
 
@@ -64,7 +84,7 @@ async function telaAutenticacao () {
                 saquesConsecutivos: 0,
                 bloqueado: false                    
             }) 
-
+            salvarConta()
             console.log("Sua conta foi cadastrada!")
         }
 
@@ -89,7 +109,7 @@ async function telaAutenticacao () {
             console.log("Resposta inválida! Escolha uma das opções acima.");
         }
     }
-}
+}  
     await telaAutenticacao();
     while (true)   {
     console.log("\n========== MENU ==========");
@@ -106,8 +126,14 @@ async function telaAutenticacao () {
                 continue;
                 }
             usuarioLogado.saldo = sacar(usuarioLogado.saldo, valorSaque);
-            usuarioLogado.extrato.push(`Saque de R$${valorSaque} - Saldo: R$${usuarioLogado.saldo}`);
+            usuarioLogado.extrato.push({
+                tipo: "Saque",
+                valor: valorSaque,
+                data: dataHora(),
+                saldo: usuarioLogado.saldo
+            });
             usuarioLogado.saquesConsecutivos += 1;
+            salvarConta()
         }
 
         if (solicitacao == "2") {
@@ -117,8 +143,14 @@ async function telaAutenticacao () {
                     continue;
                 }
             usuarioLogado.saldo = depositar(usuarioLogado.saldo, valorDepositar);
-            usuarioLogado.extrato.push(`Depósito de R$${valorDepositar} - Saldo: R$${usuarioLogado.saldo}`)
+            usuarioLogado.extrato.push({
+                tipo: "Depósito",
+                valor: valorDepositar,
+                data: dataHora(),
+                saldo: usuarioLogado.saldo
+            })
             usuarioLogado.saquesConsecutivos = 0;
+            salvarConta()
         } 
     
         if (solicitacao == "3") {          
@@ -129,9 +161,20 @@ async function telaAutenticacao () {
                         if (usuarioLogado.saldo >= valorTransferencia) {
                             console.log("Saldo suficiente!");
                             usuarioLogado.saldo -= valorTransferencia
-                                usuarioLogado.extrato.push(`${usuarioLogado.nome} você efetuou uma transferência para ${contaDestino.nome} de R$${valorTransferencia}.`);
+                                usuarioLogado.extrato.push({
+                                    tipo: "Realizou transferência",
+                                    valor: valorTransferencia,
+                                    data: dataHora(),
+                                    saldo: usuarioLogado.saldo
+                                });
                             contaDestino.saldo += valorTransferencia
-                                contaDestino.extrato.push(`Você recebeu R$${valorTransferencia} de ${usuarioLogado.nome}`);
+                                contaDestino.extrato.push({
+                                    tipo: "Recebeu tranferência",
+                                    valor: valorTransferencia,
+                                    data: dataHora(),
+                                    saldo: contaDestino.saldo
+                                });
+                                salvarConta()
                         } else {
                             console.log("Saldo insulficiente para transferência!")
                         }
@@ -142,9 +185,10 @@ async function telaAutenticacao () {
 
         if (solicitacao == "4") {
             console.log("========== EXTRATO ==========")
-            for (let linha of usuarioLogado.extrato) {
-                console.log(linha);
+            for (let transacao of usuarioLogado.extrato) {
+                console.log(`${transacao.tipo} de R$${transacao.valor} - Data e hora da transação: (${transacao.data}) - Saldo atual: R$${transacao.saldo}`);
             }
+            salvarConta()
         }
 
         if (solicitacao == "5") {
@@ -153,8 +197,9 @@ async function telaAutenticacao () {
         }
 
         if (solicitacao == "6") {
+            salvarConta();
             console.log(`Sistema Finalizado. Até mais ${usuarioLogado.nome}`);
-            usuarioLogado = null;
+
             await telaAutenticacao();
         } 
 
