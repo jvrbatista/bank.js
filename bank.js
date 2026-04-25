@@ -2,22 +2,22 @@ import readline from 'readline/promises';
 import { stdin as input, stdout as output } from 'process';
 const rl = readline.createInterface({ input, output });
 
-let listaCadastro = [];
-let usuarioCadastrado = null;
+let contas = [];
+let usuarioLogado = null;
 
 
-function depositar (saldoCLiente, valorDepositar) {
-return saldoCLiente + valorDepositar;
+function depositar (saldo, valorDepositar) {
+return saldo + valorDepositar;
 };
 
-function sacar (saldoCLiente, valorSaque) {
-    if (saldoCLiente >= valorSaque) {
-        return saldoCLiente - valorSaque;
+function sacar (saldo, valorSaque) {
+    if (saldo >= valorSaque) {
+        return saldo - valorSaque;
     } 
     
     else {
         console.log("O saldo é insuficiente para esse valor.")
-        return saldoCLiente;
+        return saldo;
     }
 };
 
@@ -28,41 +28,41 @@ async function telaAutenticacao () {
     console.log("\n============ CADASTRO DO BANCO BANK ============")
     let logout = await rl.question("1-Cadastrar\n2-Login\n\nQual serviço você deseja hoje?: ")
         if (logout == "1") {
-            let tipoDeConta;
+            let tipo;
                 let escolhaConta = await rl.question("\n========== TIPO DE CONTA ==========\n1-Corrente\n2-Poupança\n\nQual tipo de conta você vai criar? ");  
                     if (escolhaConta == "1") {
-                        tipoDeConta = "Corrente";
+                        tipo = "Corrente";
                     }
                     if (escolhaConta == "2") {
-                        tipoDeConta = "Poupança";
+                        tipo = "Poupança";
                     }
                     if (!["1","2"].includes(escolhaConta)) {
                         console.log("Não foi possível realizar o seu cadastro. Opção invállida!");
                         continue
                     }  
-            let CpfCliente = await rl.question("Digite seu CPF: ");
-                const cpfduplicado = listaCadastro.find(usuario => usuario.cpf === CpfCliente)
+            let cpf = await rl.question("Digite seu CPF: ");
+                const cpfduplicado = contas.find(usuario => usuario.cpf === cpf)
                     if (cpfduplicado){
                         console.log("Não foi possível realizar o seu cadastro. CPF já cadastrado!");
                         continue
                     }
-            let nomeCliente = await rl.question("Cadastre o seu nome de usuário: ");
-                    if(!isNaN(nomeCliente)) { 
+            let nome = await rl.question("Cadastre o seu nome de usuário: ");
+                    if(!isNaN(nome)) { 
                         console.log("Nome inválido! O campo acima aceita somente caracteres.")
                         continue
                     }
-            let senhaCliente = await rl.question("Cadastre a sua senha: ");
+            let senha = await rl.question("Cadastre a sua senha: ");
 
-            listaCadastro.push({
-                conta: tipoDeConta,
-                cpf: CpfCliente,
-                nome: nomeCliente,
-                senha: senhaCliente,
-                saldoCliente: 0,
+            contas.push({
+                tipo: tipo,
+                cpf: cpf,
+                nome: nome,
+                senha: senha,
+                saldo: 0,
                 extrato: [],
-                pontosSuspeita: 0,
-                saquesSeguidos: 0,
-                cartaoBloqueado: false                    
+                pontosFraude: 0,
+                saquesConsecutivos: 0,
+                bloqueado: false                    
             }) 
 
             console.log("Sua conta foi cadastrada!")
@@ -72,12 +72,12 @@ async function telaAutenticacao () {
             let nomeCadastro = await rl.question("Digite seu nome de usuário: ");
             let senhaCadastro = await rl.question("Digite sua senha para entrar: ")
 
-            usuarioCadastrado = listaCadastro.find(dadoscadastrais => dadoscadastrais.nome === nomeCadastro && dadoscadastrais.senha === senhaCadastro);
-                if (usuarioCadastrado) {
-                    if (usuarioCadastrado.cartaoBloqueado === true) {
+            usuarioLogado = contas.find(dadoscadastrais => dadoscadastrais.nome === nomeCadastro && dadoscadastrais.senha === senhaCadastro);
+                if (usuarioLogado) {
+                    if (usuarioLogado.bloqueado === true) {
                         console.log("Cartão Bloqueado. Ligue para central de atendimento.")
                     } else{      
-                    console.log(`Bem-vindo, ${usuarioCadastrado.nome}!`);
+                    console.log(`Bem-vindo, ${usuarioLogado.nome}!`);
                     break
                     }
                 } else {
@@ -98,16 +98,16 @@ async function telaAutenticacao () {
         if (solicitacao == "1") {
             let valorSaque = Number(await rl.question("Qual valor deseja sacar? R$"));
                 if (valorSaque > 1000) {
-                usuarioCadastrado.pontosSuspeita += 1;
+                usuarioLogado.pontosFraude += 1;
                 }
 
                 if (valorSaque <= 0) {
                 console.log("Valor inválido para saque!");
                 continue;
                 }
-            usuarioCadastrado.saldoCliente = sacar(usuarioCadastrado.saldoCliente, valorSaque);
-            usuarioCadastrado.extrato.push(`Saque de R$${valorSaque} - Saldo: R$${usuarioCadastrado.saldoCliente}`);
-            usuarioCadastrado.saquesSeguidos += 1;
+            usuarioLogado.saldo = sacar(usuarioLogado.saldo, valorSaque);
+            usuarioLogado.extrato.push(`Saque de R$${valorSaque} - Saldo: R$${usuarioLogado.saldo}`);
+            usuarioLogado.saquesConsecutivos += 1;
         }
 
         if (solicitacao == "2") {
@@ -116,22 +116,22 @@ async function telaAutenticacao () {
                     console.log("Valor inválido para depósito!");
                     continue;
                 }
-            usuarioCadastrado.saldoCliente = depositar(usuarioCadastrado.saldoCliente, valorDepositar);
-            usuarioCadastrado.extrato.push(`Depósito de R$${valorDepositar} - Saldo: R$${usuarioCadastrado.saldoCliente}`)
-            usuarioCadastrado.saquesSeguidos = 0;
+            usuarioLogado.saldo = depositar(usuarioLogado.saldo, valorDepositar);
+            usuarioLogado.extrato.push(`Depósito de R$${valorDepositar} - Saldo: R$${usuarioLogado.saldo}`)
+            usuarioLogado.saquesConsecutivos = 0;
         } 
     
         if (solicitacao == "3") {          
             let cpfDigitado = await rl.question("Digite o CPF do recebedor: ")
-            let contaDestino = listaCadastro.find(buscaConta => buscaConta.cpf == cpfDigitado)
+            let contaDestino = contas.find(buscaConta => buscaConta.cpf == cpfDigitado)
                 if (contaDestino) {
                     let valorTransferencia = Number(await rl.question("Insira o valor da transferência: "));
-                        if (usuarioCadastrado.saldoCliente >= valorTransferencia) {
+                        if (usuarioLogado.saldo >= valorTransferencia) {
                             console.log("Saldo suficiente!");
-                            usuarioCadastrado.saldoCliente -= valorTransferencia
-                                usuarioCadastrado.extrato.push(`${usuarioCadastrado.nome} você efetuou uma transferência para o ${contaDestino.nome}`);
-                            contaDestino.saldoCliente += valorTransferencia
-                                contaDestino.extrato.push(`Você recebeu R$${valorTransferencia} de ${usuarioCadastrado.nome}`);
+                            usuarioLogado.saldo -= valorTransferencia
+                                usuarioLogado.extrato.push(`${usuarioLogado.nome} você efetuou uma transferência para ${contaDestino.nome} de R$${valorTransferencia}.`);
+                            contaDestino.saldo += valorTransferencia
+                                contaDestino.extrato.push(`Você recebeu R$${valorTransferencia} de ${usuarioLogado.nome}`);
                         } else {
                             console.log("Saldo insulficiente para transferência!")
                         }
@@ -142,20 +142,19 @@ async function telaAutenticacao () {
 
         if (solicitacao == "4") {
             console.log("========== EXTRATO ==========")
-            for (let linha of usuarioCadastrado.extrato) {
+            for (let linha of usuarioLogado.extrato) {
                 console.log(linha);
             }
         }
 
         if (solicitacao == "5") {
-            console.log(`O seu saldo atual é R$${usuarioCadastrado.saldoCliente}`);
-            console.log(usuarioCadastrado)
+            console.log(`O seu saldo atual é R$${usuarioLogado.saldo}`);
             continue;
         }
 
         if (solicitacao == "6") {
-            console.log(`Sistema Finalizado. Até mais ${usuarioCadastrado.nome}`);
-            usuarioCadastrado = null;
+            console.log(`Sistema Finalizado. Até mais ${usuarioLogado.nome}`);
+            usuarioLogado = null;
             await telaAutenticacao();
         } 
 
@@ -165,12 +164,12 @@ async function telaAutenticacao () {
             continue;
         }
 
-        if (usuarioCadastrado.saquesSeguidos > 3) {
-            usuarioCadastrado.pontosSuspeita += 1
+        if (usuarioLogado.saquesConsecutivos > 3) {
+            usuarioLogado.pontosFraude += 1
         }
 
-        if (usuarioCadastrado.pontosSuspeita >= 2) {
-            usuarioCadastrado.cartaoBloqueado = true
+        if (usuarioLogado.pontosFraude >= 2) {
+            usuarioLogado.bloqueado = true
             console.log("Muitos saques seguidos. Seu cartão foi bloqueado.")
             await telaAutenticacao();
         }
