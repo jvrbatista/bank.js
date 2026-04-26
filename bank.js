@@ -4,7 +4,7 @@ import { depositar } from './src/operacoes.js';
 import { sacar } from './src/operacoes.js';
 import { carregarContas, salvarContas } from './src/contas.js';
 import { dataHora } from './src/utils.js';
-import { fraudeSenha } from './src/segurity.js';
+import { fraudeSenha } from './src/seguranca.js';
 
 const rl = readline.createInterface({ input, output });
 
