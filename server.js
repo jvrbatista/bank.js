@@ -32,7 +32,7 @@ function carregarContas() {
     }
 };
 
-function salvarConta() {
+function salvarContas(contas) {
     fs.writeFileSync('contas.json', JSON.stringify(contas))
 }
 
@@ -60,7 +60,7 @@ app.post('/cadastrar', (req, res) => {
                 bloqueado: false                    
             }) 
 
-            salvarConta()  
+            salvarContas()  
 
     res.json({ mensagem: `Usuário cadastrado com sucesso!`})
 
@@ -107,7 +107,7 @@ app.post('/depositar', (req, res) => {
         saldo: usuario.saldo
     })
     
-    salvarConta()
+    salvarContas()
 
     return res.json({
         saldo: usuario.saldo
@@ -138,7 +138,7 @@ app.post('/sacar', (req, res) => {
         saldo: usuario.saldo
     });
     
-    salvarConta()
+    salvarContas()
 
     return res.json({
         saldo: usuario.saldo
@@ -178,7 +178,7 @@ app.post('/transferir', (req, res) => {
             data: dataHora(),
             saldo: contaDestino.saldo
         });
-        salvarConta()
+        salvarContas()
         return res.json({
         saldo: usuario.saldo
         })

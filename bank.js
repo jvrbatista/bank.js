@@ -1,45 +1,17 @@
-import fs from 'fs';
 import readline from 'readline/promises';
 import { stdin as input, stdout as output } from 'process';
-const rl = readline.createInterface({ input, output });
+import { depositar } from './src/operacoes.js';
+import { sacar } from './src/operacoes.js';
+import { carregarContas, salvarContas } from './src/contas.js';
+import { dataHora } from './src/utils.js';
+import { fraudeSenha } from './src/segurity.js';
 
+const rl = readline.createInterface({ input, output });
 
 let contas = [];
 let usuarioLogado = null;
- 
-function carregarContas() {
-    try {
-        const texto = fs.readFileSync('contas.json', 'utf-8');
-    return JSON.parse(texto);
-    } catch (error) {
-        return []
-    }
-};
-
-function salvarConta() {
-    fs.writeFileSync('contas.json', JSON.stringify(contas))
-}
-
-function dataHora() {
-    const agora = new Date()
-    return `${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR')}`
-}
 
 
-function depositar (saldo, valorDepositar) {
-    return saldo + valorDepositar;
-};
-
-function sacar (saldo, valorSaque) {
-    if (saldo >= valorSaque) {
-        return saldo - valorSaque;
-    } 
-    
-    else {
-        console.log("O saldo é insuficiente para esse valor.")
-        return saldo;
-    }
-};
 contas = carregarContas()
 async function telaAutenticacao () {
     console.log("\nOlá cliente do BANK, Seja bem-vindo!");
@@ -80,11 +52,12 @@ async function telaAutenticacao () {
                 senha: senha,
                 saldo: 0,
                 extrato: [],
+                tentativasSenha: 0,
                 pontosFraude: 0,
                 saquesConsecutivos: 0,
                 bloqueado: false                    
             }) 
-            salvarConta()
+            salvarContas(contas)
             console.log("Sua conta foi cadastrada!")
         }
 
@@ -92,18 +65,27 @@ async function telaAutenticacao () {
             let nomeCadastro = await rl.question("Digite seu nome de usuário: ");
             let senhaCadastro = await rl.question("Digite sua senha para entrar: ")
 
-            usuarioLogado = contas.find(dadoscadastrais => dadoscadastrais.nome === nomeCadastro && dadoscadastrais.senha === senhaCadastro);
-                if (usuarioLogado) {
-                    if (usuarioLogado.bloqueado === true) {
-                        console.log("Cartão Bloqueado. Ligue para central de atendimento.")
-                    } else{      
-                    console.log(`Bem-vindo, ${usuarioLogado.nome}!`);
-                    break
-                    }
+            usuarioLogado = contas.find(dadoscadastrais => dadoscadastrais.nome === nomeCadastro);
+                if(!usuarioLogado) {
+                    console.log("Usuário não encontrado.");
+                    continue
                 } else {
-                    console.log("Usuário ou senha incorretos.")
-                }
-        }
+                    fraudeSenha(usuarioLogado, senhaCadastro);
+                        if (usuarioLogado.bloqueado) {
+                            console.log("Cartão Bloqueado. Ligue para central de atendimento.");
+                            continue
+                        } else if (usuarioLogado.senha === senhaCadastro) {
+                            usuarioLogado.nome = nomeCadastro;
+                            usuarioLogado.tentativasSenha = 0;
+                            console.log(`Bem-vindo, ${usuarioLogado.nome}!`);
+                            salvarContas(contas)
+                            break
+                        } else {
+                            console.log("Senha incorreta.");
+                            continue
+                        }
+                }   
+        } 
 
         if(!["1","2"].includes(logout)) {
             console.log("Resposta inválida! Escolha uma das opções acima.");
@@ -133,7 +115,7 @@ async function telaAutenticacao () {
                 saldo: usuarioLogado.saldo
             });
             usuarioLogado.saquesConsecutivos += 1;
-            salvarConta()
+            salvarContas(contas)
         }
 
         if (solicitacao == "2") {
@@ -150,7 +132,7 @@ async function telaAutenticacao () {
                 saldo: usuarioLogado.saldo
             })
             usuarioLogado.saquesConsecutivos = 0;
-            salvarConta()
+            salvarContas(contas)
         } 
     
         if (solicitacao == "3") {          
@@ -174,7 +156,7 @@ async function telaAutenticacao () {
                                     data: dataHora(),
                                     saldo: contaDestino.saldo
                                 });
-                                salvarConta()
+                                salvarContas(contas)
                         } else {
                             console.log("Saldo insulficiente para transferência!")
                         }
@@ -188,7 +170,7 @@ async function telaAutenticacao () {
             for (let transacao of usuarioLogado.extrato) {
                 console.log(`${transacao.tipo} de R$${transacao.valor} - Data e hora da transação: (${transacao.data}) - Saldo atual: R$${transacao.saldo}`);
             }
-            salvarConta()
+            salvarContas(contas)
         }
 
         if (solicitacao == "5") {
@@ -197,7 +179,7 @@ async function telaAutenticacao () {
         }
 
         if (solicitacao == "6") {
-            salvarConta();
+            salvarContas(contas);
             console.log(`Sistema Finalizado. Até mais ${usuarioLogado.nome}`);
 
             await telaAutenticacao();
