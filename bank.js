@@ -4,7 +4,7 @@ import { depositar } from './src/operacoes.js';
 import { sacar } from './src/operacoes.js';
 import { carregarContas, salvarContas } from './src/contas.js';
 import { dataHora } from './src/utils.js';
-import { fraudeSenha } from './src/seguranca.js';
+import { fraudeSenha, fraudeSaque } from './src/seguranca.js';
 
 const rl = readline.createInterface({ input, output });
 
@@ -52,7 +52,8 @@ async function telaAutenticacao () {
                 senha: senha,
                 saldo: 0,
                 extrato: [],
-                tentativasSenha: 0,
+                tentativasSenha: 0, 
+                tentativaFraudeSaque: 0,
                 pontosFraude: 0,
                 saquesConsecutivos: 0,
                 bloqueado: false                    
@@ -72,7 +73,7 @@ async function telaAutenticacao () {
                 } else {
                     fraudeSenha(usuarioLogado, senhaCadastro);
                         if (usuarioLogado.bloqueado) {
-                            console.log("Cartão Bloqueado. Ligue para central de atendimento.");
+                            console.log("Sua conta foi bloqueada. Ligue para central de atendimento.");
                             continue
                         } else if (usuarioLogado.senha === senhaCadastro) {
                             usuarioLogado.nome = nomeCadastro;
@@ -99,23 +100,22 @@ async function telaAutenticacao () {
 
         if (solicitacao == "1") {
             let valorSaque = Number(await rl.question("Qual valor deseja sacar? R$"));
-                if (valorSaque > 1000) {
-                usuarioLogado.pontosFraude += 1;
-                }
-
-                if (valorSaque <= 0) {
-                console.log("Valor inválido para saque!");
-                continue;
-                }
-            usuarioLogado.saldo = sacar(usuarioLogado.saldo, valorSaque);
-            usuarioLogado.extrato.push({
-                tipo: "Saque",
-                valor: valorSaque,
-                data: dataHora(),
-                saldo: usuarioLogado.saldo
-            });
-            usuarioLogado.saquesConsecutivos += 1;
-            salvarContas(contas)
+                if (usuarioLogado.saldo >= valorSaque) {
+                    fraudeSaque(usuarioLogado, valorSaque)
+                    if (usuarioLogado.tentativaFraudeSaque > 3) {
+                        usuarioLogado.bloqueado = true;
+                        console.log("Sua conta foi bloqueada. Ligue para central de atendimento.");
+                        continue
+                    }
+                        usuarioLogado.saldo = sacar(usuarioLogado.saldo, valorSaque);
+                        usuarioLogado.extrato.push({
+                            tipo: "Saque",
+                            valor: valorSaque,
+                            data: dataHora(),
+                            saldo: usuarioLogado.saldo
+                        });
+                        salvarContas(contas);
+                } 
         }
 
         if (solicitacao == "2") {
@@ -187,18 +187,6 @@ async function telaAutenticacao () {
 
         if (!["1","2","3","4","5","6"].includes(solicitacao)) {
             console.log("Resposta inválida! Voltando para tela inicial.")
-            await telaAutenticacao();
             continue;
-        }
-
-        if (usuarioLogado.saquesConsecutivos > 3) {
-            usuarioLogado.pontosFraude += 1
-        }
-
-        if (usuarioLogado.pontosFraude >= 2) {
-            usuarioLogado.bloqueado = true
-            console.log("Muitos saques seguidos. Seu cartão foi bloqueado.")
-            await telaAutenticacao();
-        }
-    }
+        }}
 rl.close();
