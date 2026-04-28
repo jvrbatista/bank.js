@@ -100,22 +100,22 @@ async function telaAutenticacao () {
 
         if (solicitacao == "1") {
             let valorSaque = Number(await rl.question("Qual valor deseja sacar? R$"));
-                if (usuarioLogado.saldo >= valorSaque) {
-                    fraudeSaque(usuarioLogado, valorSaque)
+                fraudeSaque(usuarioLogado, valorSaque)
                     if (usuarioLogado.tentativaFraudeSaque > 3) {
                         usuarioLogado.bloqueado = true;
                         console.log("Sua conta foi bloqueada. Ligue para central de atendimento.");
-                        continue
+                        continue;
+                    } else if (usuarioLogado.bloqueado === true) {
+                        continue;
                     }
-                        usuarioLogado.saldo = sacar(usuarioLogado.saldo, valorSaque);
-                        usuarioLogado.extrato.push({
-                            tipo: "Saque",
-                            valor: valorSaque,
-                            data: dataHora(),
-                            saldo: usuarioLogado.saldo
-                        });
-                        salvarContas(contas);
-                } 
+                usuarioLogado.saldo = sacar(usuarioLogado.saldo, valorSaque);
+                usuarioLogado.extrato.push({
+                    tipo: "Saque",
+                    valor: valorSaque,
+                    data: dataHora(),
+                    saldo: usuarioLogado.saldo
+                });
+                salvarContas(contas);
         }
 
         if (solicitacao == "2") {
