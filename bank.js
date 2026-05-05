@@ -1,10 +1,10 @@
 import readline from 'readline/promises';
 import { stdin as input, stdout as output } from 'process';
-import { depositar } from './src/operacoes.js';
-import { sacar } from './src/operacoes.js';
-import { carregarContas, salvarContas } from './src/contas.js';
-import { dataHora } from './src/utils.js';
-import { fraudeSenha, fraudeSaque } from './src/seguranca.js';
+import { depositar } from './User/src/operations.js';
+import { sacar } from './User/src/operations.js';
+import { carregarContas, salvarContas } from './User/src/accountsUser.js';
+import { dataHora } from './User/src/utils.js';
+import { fraudeSenha, fraudeSaque } from './User/src/security.js';
 
 const rl = readline.createInterface({ input, output });
 
