@@ -1,8 +1,8 @@
 import express from 'express'
-import { depositar } from './src/operations.js';
-import { sacar } from './src/operations.js';
-import { carregarContas, salvarContas } from './src/accountsUser.js';
-import { dataHora } from './src/utils.js';
+import { depositar } from '../User/src/operations.js';
+import { sacar } from '../User/src/operations.js';
+import { carregarContas, salvarContas } from '../User/src/accountsUser.js';
+import { dataHora } from '../User/src/utils.js';
 
 let contas = [];
 
