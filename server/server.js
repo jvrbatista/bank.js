@@ -1,4 +1,3 @@
-import fs from 'fs'
 import express from 'express'
 import { depositar } from './src/operacoes.js';
 import { sacar } from './src/operacoes.js';
