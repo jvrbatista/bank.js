@@ -1,4 +1,3 @@
-
 export function fraudeSenha (usuarioLogado, senhaCadastro) {
     if (!usuarioLogado) return;
 

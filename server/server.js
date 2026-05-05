@@ -4,12 +4,8 @@ import { depositar } from './src/operacoes.js';
 import { sacar } from './src/operacoes.js';
 import { carregarContas, salvarContas } from './src/contas.js';
 import { dataHora } from './src/utils.js';
-import { fraudeSenha, fraudeSaque } from './src/seguranca.js';
-
-
 
 let contas = [];
-
 
 contas = carregarContas()
 const app = express()
@@ -121,7 +117,6 @@ app.post('/sacar', (req, res) => {
     return res.json({
         saldo: usuario.saldo
     })
-
     
 })
 

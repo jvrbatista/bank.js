@@ -11,7 +11,6 @@ const rl = readline.createInterface({ input, output });
 let contas = [];
 let usuarioLogado = null;
 
-
 contas = carregarContas()
 async function telaAutenticacao () {
     console.log("\nOlá cliente do BANK, Seja bem-vindo!");
