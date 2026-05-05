@@ -1,40 +1,15 @@
 import fs from 'fs'
 import express from 'express'
+import { depositar } from './src/operacoes.js';
+import { sacar } from './src/operacoes.js';
+import { carregarContas, salvarContas } from './src/contas.js';
+import { dataHora } from './src/utils.js';
+import { fraudeSenha, fraudeSaque } from './src/seguranca.js';
+
+
 
 let contas = [];
 
-function depositar (saldo, valorDepositar) {
-    return saldo + valorDepositar;
-};
-
-function sacar (saldo, valorSaque) {
-    if (saldo >= valorSaque) {
-        return saldo - valorSaque;
-    } 
-    
-    else {
-        console.log("O saldo é insuficiente para esse valor.")
-        return saldo;
-    }
-};
-
-function dataHora() {
-    const agora = new Date()
-    return `${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR')}`
-}
- 
-function carregarContas() {
-    try {
-        const texto = fs.readFileSync('contas.json', 'utf-8');
-    return JSON.parse(texto);
-    } catch (error) {
-        return []
-    }
-};
-
-function salvarContas(contas) {
-    fs.writeFileSync('contas.json', JSON.stringify(contas))
-}
 
 contas = carregarContas()
 const app = express()
@@ -55,12 +30,15 @@ app.post('/cadastrar', (req, res) => {
                 senha: senha,
                 saldo: 0,
                 extrato: [],
+                tentativasSenha: 0, 
+                tentativaFraudeSaque: 0,    
                 pontosFraude: 0,
                 saquesConsecutivos: 0,
-                bloqueado: false                    
+                bloqueado: false 
+
             }) 
 
-            salvarContas()  
+            salvarContas(contas)  
 
     res.json({ mensagem: `Usuário cadastrado com sucesso!`})
 
@@ -99,7 +77,7 @@ app.post('/depositar', (req, res) => {
        return res.json({ erro: "Valor inválido!"})
     }
 
-    usuario.saldo = depositar(valorDepositar, usuario.saldo)
+    usuario.saldo = depositar(usuario.saldo, valorDepositar)
     usuario.extrato.push({
         tipo: "Depósito",
         valor: valorDepositar,
@@ -107,7 +85,7 @@ app.post('/depositar', (req, res) => {
         saldo: usuario.saldo
     })
     
-    salvarContas()
+    salvarContas(contas)
 
     return res.json({
         saldo: usuario.saldo
@@ -130,7 +108,7 @@ app.post('/sacar', (req, res) => {
         return res.json({ erro: "Valor inválido!"})
     }
 
-    usuario.saldo = sacar(valorSaque, usuario.saldo)
+    usuario.saldo = sacar(usuario.saldo, valorSaque)
     usuario.extrato.push({
         tipo: "Saque",
         valor: valorSaque,
@@ -138,7 +116,7 @@ app.post('/sacar', (req, res) => {
         saldo: usuario.saldo
     });
     
-    salvarContas()
+    salvarContas(contas)
 
     return res.json({
         saldo: usuario.saldo
@@ -161,7 +139,7 @@ app.post('/transferir', (req, res) => {
     if (valorTransferencia <= 0) {
         return res.json({ erro: "Valor inválido!"})
     }
-    if (usuario.saldo <= valorTransferencia) {
+    if (usuario.saldo < valorTransferencia) {
         return res.json({ erro: "Saldo insuficiente!"})
     } else {
         usuario.saldo -= valorTransferencia
@@ -178,7 +156,7 @@ app.post('/transferir', (req, res) => {
             data: dataHora(),
             saldo: contaDestino.saldo
         });
-        salvarContas()
+        salvarContas(contas)
         return res.json({
         saldo: usuario.saldo
         })
