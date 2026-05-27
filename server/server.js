@@ -3,22 +3,25 @@ import { depositar } from '../User/src/operations.js';
 import { sacar } from '../User/src/operations.js';
 import { carregarContas, salvarContas } from '../User/src/accountsUser.js';
 import { dataHora } from '../User/src/utils.js';
+import { carregarContasGestao, salvarContasGestao} from '../Management/src/accountsManagement.js'
 
-let contas = [];
+let contasGestao = [];
+let contasUser = [];
 
-contas = carregarContas()
+contasGestao = carregarContasGestao()
+contasUser = carregarContas()
 const app = express()
 app.use(express.json())
 
 app.post('/cadastrar', (req, res) => {
     const {tipo, cpf, nome, senha} = req.body
 
-        const cpfduplicado = contas.find(usuario => usuario.cpf === cpf)
+        const cpfduplicado = contasUser.find(usuario => usuario.cpf === cpf)
             if (cpfduplicado){
                 return res.json ({ erro: "CPF já cadastrado!"})
             }
 
-            contas.push({
+            contasUser.push({
                 tipo: tipo,
                 cpf: cpf,
                 nome: nome,
@@ -30,10 +33,9 @@ app.post('/cadastrar', (req, res) => {
                 pontosFraude: 0,
                 saquesConsecutivos: 0,
                 bloqueado: false 
-
             }) 
 
-            salvarContas(contas)  
+            salvarContas(contasUser)  
 
     res.json({ mensagem: `Usuário cadastrado com sucesso!`})
 
@@ -42,16 +44,15 @@ app.post('/cadastrar', (req, res) => {
 app.post('/login', (req, res) => {
     const {nome, senha} = req.body
 
-    const usuario = contas.find(u => u.nome === nome && u.senha === senha)
+    const usuario = contasUser.find(u => u.nome === nome && u.senha === senha)
 
     if (!usuario) {
         return res.json({ erro: 'Usuário ou senha incorretos' })
     }
-
     if (usuario.bloqueado) {
         return res.json({ erro: 'Conta bloqueada' })
     }
-
+    
     return res.json({
         nome: usuario.nome,
         tipo: usuario.tipo,
@@ -60,9 +61,39 @@ app.post('/login', (req, res) => {
 
 })
 
+app.post('/loginGestao', (req, res) => {
+    const {email, senha} = req.body
+
+    const gestor = contasGestao.find(gestorUser => gestorUser.email === email && gestorUser.senha === senha)
+
+    if (!gestor) {
+        return res.json({ erro: 'Gestor não encontrado!' })
+    }
+    if (gestor.bloqueado) {
+        return res.json({ erro: 'Gestor bloqueado!' })
+    }
+    if (!gestor.email.endsWith("@bankjs.com.br")) {
+        return res.json({ erro: 'Email inválido!'})
+    } 
+    if (gestor.senha.length < 8) {
+        return res.json({ erro: "Senha inválida!"})
+    }
+
+    gestor.token = crypto.randomUUID()
+    salvarContasGestao(contasGestao)
+
+    return res.json({
+        token: gestor.token,
+        email: gestor.email,
+        tipo: gestor.tipo
+    })
+})
+
+
+
 app.post('/depositar', (req, res) => {
     const {cpf, valorDepositar} = req.body
-    const usuario = contas.find(buscaConta => buscaConta.cpf === cpf)
+    const usuario = contasUser.find(buscaConta => buscaConta.cpf === cpf)
 
     if (!usuario) {
         return res.json({ erro: 'Usuário não encontrado!' })
@@ -80,7 +111,7 @@ app.post('/depositar', (req, res) => {
         saldo: usuario.saldo
     })
     
-    salvarContas(contas)
+    salvarContas(contasUser)
 
     return res.json({
         saldo: usuario.saldo
@@ -90,7 +121,7 @@ app.post('/depositar', (req, res) => {
 
 app.post('/sacar', (req, res) => {
     const {cpf, valorSaque} = req.body
-    const usuario = contas.find(u => u.cpf === cpf)
+    const usuario = contasUser.find(u => u.cpf === cpf)
 
     if (!usuario) {
         return res.json({ erro: 'Usuário não encontrado!' })
@@ -111,7 +142,7 @@ app.post('/sacar', (req, res) => {
         saldo: usuario.saldo
     });
     
-    salvarContas(contas)
+    salvarContas(contasUser)
 
     return res.json({
         saldo: usuario.saldo
@@ -121,8 +152,8 @@ app.post('/sacar', (req, res) => {
 
 app.post('/transferir', (req, res) => {
     const {cpf, cpfDestino, valorTransferencia} = req.body
-    const usuario = contas.find(buscaConta => buscaConta.cpf === cpf)
-    const contaDestino = contas.find(buscaContaDestino => buscaContaDestino.cpf === cpfDestino)
+    const usuario = contasUser.find(buscaConta => buscaConta.cpf === cpf)
+    const contaDestino = contasUser.find(buscaContaDestino => buscaContaDestino.cpf === cpfDestino)
 
     if (!usuario) {
         return res.json({ erro: 'Usuário não encontrado!' })
@@ -150,7 +181,7 @@ app.post('/transferir', (req, res) => {
             data: dataHora(),
             saldo: contaDestino.saldo
         });
-        salvarContas(contas)
+        salvarContas(contasUser)
         return res.json({
         saldo: usuario.saldo
         })
@@ -159,7 +190,7 @@ app.post('/transferir', (req, res) => {
 
 app.get('/extrato', (req, res) => {
     const {cpf} = req.body
-    const usuario = contas.find(buscaConta => buscaConta.cpf === cpf)
+    const usuario = contasUser.find(buscaConta => buscaConta.cpf === cpf)
     
     if (!usuario) {
         return res.json({ erro: 'Usuário não encontrado!' })
@@ -170,7 +201,7 @@ app.get('/extrato', (req, res) => {
 
 app.get('/saldo', (req, res) => {
     const {cpf} = req.body
-    const usuario = contas.find(buscarConta => buscarConta.cpf === cpf)
+    const usuario = contasUser.find(buscarConta => buscarConta.cpf === cpf)
 
     if(!usuario) {
         return res.json({ erro: "Usuário não encontrado!"})
