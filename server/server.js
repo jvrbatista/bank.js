@@ -4,6 +4,7 @@ import { sacar } from '../User/src/operations.js';
 import { carregarContas, salvarContas } from '../User/src/accountsUser.js';
 import { dataHora } from '../User/src/utils.js';
 import { carregarContasGestao, salvarContasGestao} from '../Management/src/accountsManagement.js'
+import { fraudeSenha } from '../User/src/security.js';
 
 let contasGestao = [];
 let contasUser = [];
@@ -42,33 +43,54 @@ app.post('/cadastrar', (req, res) => {
 })
 
 app.post('/cadastroGestao', (req, res) => {
-    const {email, senha} = req.body
+    const {nome, email, senha} = req.body
+
+    if (!email.endsWith("@bankjs.com.br")) {
+        return res.json({ erro: 'Email inválido!'})
+    }
+
+    if (senha.length < 8) {
+        return res.json({ erro: "Senha inválida!"})
+    }
+    
+    if (!nome.includes(" ")) {
+        return res.json({ erro: "Nome inválido!"})
+    }
 
     const emailDuplicado = contasGestao.find(gestor => gestor.email === email)
             if (emailDuplicado){
                 return res.json ({ erro: "Email já cadastrado!"})
             }
 
-    
-        
     contasGestao.push({
         nome: nome,
         email: email,
         senha: senha,
+        tentativasSenha: 0,
+        bloqueado: false,
+        tipo: tipo
     })
+
+    salvarContasGestao(contasGestao)
+
+    return res.json({ mensagem: `Gestor cadastrado com sucesso!`})
 
 })
 
 app.post('/login', (req, res) => {
     const {nome, senha} = req.body
-
-    const usuario = contasUser.find(u => u.nome === nome && u.senha === senha)
+    const usuario = contasUser.find(u => u.nome === nome)
 
     if (!usuario) {
-        return res.json({ erro: 'Usuário ou senha incorretos' })
+        return res.json({ erro: 'Usuário não encontrado!' })
     }
-    if (usuario.bloqueado) {
-        return res.json({ erro: 'Conta bloqueada' })
+    fraudeSenha(usuario, senha)
+    salvarContas(contasUser)
+    if (usuario.bloqueado === true) {
+        return res.json({ erro: "Acesso bloqueado!"})
+    } 
+    if (usuario.senha !== senha) {
+        return res.json({ erro: "Senha inválida!"})
     }
     
     return res.json({
@@ -79,18 +101,24 @@ app.post('/login', (req, res) => {
 
 })
 
-//Rota de Login da Gestão
+// Rota de Login da Gestão
 app.post('/loginGestao', (req, res) => {
     const {email, senha} = req.body
+    const gestor = contasGestao.find(gestorUser => gestorUser.email === email)
 
-    const gestor = contasGestao.find(gestorUser => gestorUser.email === email && gestorUser.senha === senha)
-
+    
     if (!gestor) {
         return res.json({ erro: 'Gestor não encontrado!' })
     }
-    if (gestor.bloqueado) {
-        return res.json({ erro: 'Gestor bloqueado!' })
+    fraudeSenha(gestor, senha)
+    salvarContasGestao(contasGestao)
+    if (gestor.bloqueado === true) {
+        return res.json({ erro: "Acesso bloqueado!"})
+    } 
+    if (gestor.senha !== senha) {
+        return res.json({ erro: "Senha inválida!"})
     }
+  
     if (!gestor.email.endsWith("@bankjs.com.br")) {
         return res.json({ erro: 'Email inválido!'})
     } 
@@ -107,8 +135,6 @@ app.post('/loginGestao', (req, res) => {
         tipo: gestor.tipo
     })
 })
-
-
 
 app.post('/depositar', (req, res) => {
     const {cpf, valorDepositar} = req.body
