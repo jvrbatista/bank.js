@@ -1,4 +1,4 @@
-# bank.js 💰
+# BANK-JS 💰
 
 
 
