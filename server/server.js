@@ -41,6 +41,24 @@ app.post('/cadastrar', (req, res) => {
 
 })
 
+app.post('/cadastroGestao', (req, res) => {
+    const {email, senha} = req.body
+
+    const emailDuplicado = contasGestao.find(gestor => gestor.email === email)
+            if (emailDuplicado){
+                return res.json ({ erro: "Email já cadastrado!"})
+            }
+
+    
+        
+    contasGestao.push({
+        nome: nome,
+        email: email,
+        senha: senha,
+    })
+
+})
+
 app.post('/login', (req, res) => {
     const {nome, senha} = req.body
 
@@ -61,6 +79,7 @@ app.post('/login', (req, res) => {
 
 })
 
+//Rota de Login da Gestão
 app.post('/loginGestao', (req, res) => {
     const {email, senha} = req.body
 
