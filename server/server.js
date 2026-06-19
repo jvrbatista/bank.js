@@ -6,6 +6,7 @@ import { dataHora } from '../User/src/utils.js';
 import { carregarContasGestao, salvarContasGestao} from '../Management/src/accountsManagement.js'
 import { fraudeSenha } from '../User/src/security.js';
 
+
 let contasGestao = [];
 let contasUser = [];
 
@@ -14,7 +15,8 @@ contasUser = carregarContas()
 const app = express()
 app.use(express.json())
 
-app.post('/cadastrar', (req, res) => {
+// ROTA DE CADASTRO
+app.post('/cadastroUsuario', (req, res) => {
     const {tipo, cpf, nome, senha} = req.body
 
         const cpfduplicado = contasUser.find(usuario => usuario.cpf === cpf)
@@ -42,6 +44,7 @@ app.post('/cadastrar', (req, res) => {
 
 })
 
+// ROTA DE CADASTRO DE GESTÃO
 app.post('/cadastroGestao', (req, res) => {
     const {nome, email, senha} = req.body
 
@@ -77,7 +80,8 @@ app.post('/cadastroGestao', (req, res) => {
 
 })
 
-app.post('/login', (req, res) => {
+// ROTA DE LOGIN DE USUÁRIO
+app.post('/loginUsuario', (req, res) => {
     const {nome, senha} = req.body
     const usuario = contasUser.find(u => u.nome === nome)
 
@@ -101,7 +105,7 @@ app.post('/login', (req, res) => {
 
 })
 
-// Rota de Login da Gestão
+// ROTA DE LOGIN DE GESTÃO
 app.post('/loginGestao', (req, res) => {
     const {email, senha} = req.body
     const gestor = contasGestao.find(gestorUser => gestorUser.email === email)
@@ -136,7 +140,32 @@ app.post('/loginGestao', (req, res) => {
     })
 })
 
-app.post('/depositar', (req, res) => {
+// ROTA DE LISTA DE CONTAS CADASTRADAS 
+app.get('/gerente/contas', (req, res) => {
+    return res.json(contasUser)
+})
+
+// ROTA BUSCA DE CONTA POR CPF
+app.get('/gerente/contas/:cpf', (req,res) => {
+    const {cpf} = req.params
+    const usuario = contasUser.find(buscarConta => buscarConta.cpf === cpf)
+
+    if(!usuario) {
+        return res.json({ erro: "Usuário não encontrado!"})
+    }
+
+    return res.json(usuario)
+})
+
+// ROTA DE ACESSO AO EXTRATO DOS USUÁRIOS
+app.get('/gerente/transacoes', (req, res) => {
+    const extratos = contasUser.map(usuario => usuario.extrato)
+
+    return res.json(extratos)
+})
+
+// ROTA DE DEPÓSITO DE USUÁRIO
+app.post('/depositarUsuario', (req, res) => {
     const {cpf, valorDepositar} = req.body
     const usuario = contasUser.find(buscaConta => buscaConta.cpf === cpf)
 
@@ -164,7 +193,8 @@ app.post('/depositar', (req, res) => {
     
 })
 
-app.post('/sacar', (req, res) => {
+// ROTA DE SAQUE DE USUÁRIO
+app.post('/sacarUsuario', (req, res) => {
     const {cpf, valorSaque} = req.body
     const usuario = contasUser.find(u => u.cpf === cpf)
 
@@ -195,6 +225,7 @@ app.post('/sacar', (req, res) => {
     
 })
 
+// ROTA DE TRANSFERÊNCIA DO USUÁRIO
 app.post('/transferir', (req, res) => {
     const {cpf, cpfDestino, valorTransferencia} = req.body
     const usuario = contasUser.find(buscaConta => buscaConta.cpf === cpf)
@@ -233,7 +264,8 @@ app.post('/transferir', (req, res) => {
     }       
 })
 
-app.get('/extrato', (req, res) => {
+// ROTA DE EXTRATO DO USUÁRIO
+app.get('/extratoUsuario', (req, res) => {
     const {cpf} = req.body
     const usuario = contasUser.find(buscaConta => buscaConta.cpf === cpf)
     
@@ -244,6 +276,7 @@ app.get('/extrato', (req, res) => {
     return res.json(usuario.extrato)
 })
 
+// ROTA DE SALDO DO USUÁRIO
 app.get('/saldo', (req, res) => {
     const {cpf} = req.body
     const usuario = contasUser.find(buscarConta => buscarConta.cpf === cpf)
@@ -253,6 +286,21 @@ app.get('/saldo', (req, res) => {
     }
 
     return res.json(usuario.saldo)
+})
+
+// ROTA DE BLOQUEIO/DESBLOQUEIO CARTÃO DO USUÁRIO
+app.put('/gerente/bloquear/:cpf', (req, res) => {
+    const {cpf} = req.params
+    const usuario = contasUser.find(buscarConta => buscarConta.cpf === cpf)
+
+    if(!usuario) {
+        return res.json({ erro: "Usuário não encontrado!"})
+    }
+    
+    usuario.bloqueado = !usuario.bloqueado
+
+    salvarContas(contasUser)
+    return res.json( {mensagem : usuario.bloqueado ? 'Usuário bloqueado!' : 'Usuário desbloqueado!'})
 })
 
 app.listen(3000, () => {
