@@ -46,7 +46,7 @@ app.post('/cadastroUsuario', (req, res) => {
 
 // ROTA DE CADASTRO DE GESTÃO
 app.post('/cadastroGestao', (req, res) => {
-    const {nome, email, senha} = req.body
+    const {nome, email, senha, tipo} = req.body
 
     if (!email.endsWith("@bankjs.com.br")) {
         return res.json({ erro: 'Email inválido!'})
