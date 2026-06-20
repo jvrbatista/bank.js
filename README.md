@@ -17,12 +17,8 @@ O BankJS começou como um sistema de terminal e evoluiu para uma API REST comple
 - Detector de fraude automático
 - Bloqueio de cartão por atividade suspeita
 - Persistência de dados em arquivo JSON
+  
 ## Como rodar
- 
-### Terminal
-```bash
-node bank.js
-```
  
 ### API REST
 ```bash
@@ -35,6 +31,7 @@ Servidor disponível em `http://localhost:3000`
 | Método | Rota | Descrição |
 |---|---|---|
 | POST | /cadastrar | Cria uma nova conta |
+| POST | /loginGestao | Autentica o Gestor | 
 | POST | /login | Autentica o usuário |
 | POST | /depositar | Realiza um depósito |
 | POST | /sacar | Realiza um saque |

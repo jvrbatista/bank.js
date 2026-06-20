@@ -136,7 +136,7 @@ app.post('/loginGestao', (req, res) => {
     return res.json({
         token: gestor.token,
         email: gestor.email,
-        tipo: gestor.tipo
+        tipo: gestor.tipo 
     })
 })
 
