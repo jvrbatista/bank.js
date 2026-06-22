@@ -1,7 +1,11 @@
-export function fraudeSenha (usuarioLogado, senhaCadastro) {
+import bcrypt from 'bcrypt'
+
+export async function fraudeSenha (usuarioLogado, senhaCadastro) {
     if (!usuarioLogado) return;
 
-    if (senhaCadastro !== usuarioLogado.senha) {
+    let validacaoSenha = await bcrypt.compare(senhaCadastro, usuarioLogado.senha)
+
+    if (validacaoSenha === false) {
         usuarioLogado.tentativasSenha ++;
         if (usuarioLogado.tentativasSenha === 3) {
             usuarioLogado.bloqueado = true;
@@ -9,7 +13,7 @@ export function fraudeSenha (usuarioLogado, senhaCadastro) {
     } else {
         usuarioLogado.tentativasSenha = 0;
     }
-}
+}   
 
 export function fraudeSaque (usuarioLogado, valorSaque) {
         if (!usuarioLogado) return;

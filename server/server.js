@@ -8,6 +8,7 @@ import { fraudeSenha } from '../User/src/security.js';
 import { autenticadorManager } from './middlewares/auth.js';
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import bcrypt from 'bcrypt'
 dotenv.config()
 
 let contasGestao = [];
@@ -19,7 +20,7 @@ const app = express()
 app.use(express.json())
 
 // ROTA DE CADASTRO
-app.post('/cadastroUsuario', (req, res) => {
+app.post('/cadastroUsuario', async (req, res) => {
     const {tipo, cpf, nome, senha} = req.body
 
         const cpfduplicado = contasUser.find(usuario => usuario.cpf === cpf)
@@ -27,11 +28,13 @@ app.post('/cadastroUsuario', (req, res) => {
                 return res.json ({ erro: "CPF já cadastrado!"})
             }
 
+            const senhaHash = await bcrypt.hash(senha, 10)
+
             contasUser.push({
                 tipo: tipo,
                 cpf: cpf,
                 nome: nome,
-                senha: senha,
+                senha: senhaHash,
                 saldo: 0,
                 extrato: [],
                 tentativasSenha: 0, 
@@ -84,32 +87,34 @@ app.post('/cadastroGestao', (req, res) => {
 })
 
 // ROTA DE LOGIN DE USUÁRIO
-app.post('/loginUsuario', (req, res) => {
-    const {nome, senha} = req.body
-    const usuario = contasUser.find(u => u.nome === nome)
+    app.post('/loginUsuario', async (req, res) => {
+        const {nome, senha} = req.body
+        const usuario = contasUser.find(u => u.nome === nome)
 
-    if (!usuario) {
-        return res.json({ erro: 'Usuário não encontrado!' })
-    }
-    fraudeSenha(usuario, senha)
-    salvarContas(contasUser)
-    if (usuario.bloqueado === true) {
-        return res.json({ erro: "Acesso bloqueado!"})
-    } 
-    if (usuario.senha !== senha) {
-        return res.json({ erro: "Senha inválida!"})
-    }
-    
-    return res.json({
-        nome: usuario.nome,
-        tipo: usuario.tipo,
-        saldo: usuario.saldo
+        if (!usuario) {
+            return res.json({ erro: 'Usuário não encontrado!' })
+        }
+        await fraudeSenha(usuario, senha)
+        salvarContas(contasUser)
+        if (usuario.bloqueado === true) {
+            return res.json({ erro: "Acesso bloqueado!"})
+        } 
+
+        let validacaoSenha = await bcrypt.compare(senha, usuario.senha)
+        if (validacaoSenha === false) {
+            return res.json({ erro: 'Senha inválida!'})
+        }
+        
+        return res.json({
+            nome: usuario.nome,
+            tipo: usuario.tipo,
+            saldo: usuario.saldo
+        })
+
     })
 
-})
-
 // ROTA DE LOGIN DE GESTÃO
-app.post('/loginGestao', (req, res) => {
+app.post('/loginGestao', async (req, res) => {
     const {email, senha} = req.body
     const gestor = contasGestao.find(gestorUser => gestorUser.email === email)
 
@@ -117,7 +122,7 @@ app.post('/loginGestao', (req, res) => {
     if (!gestor) {
         return res.json({ erro: 'Gestor não encontrado!' })
     }
-    fraudeSenha(gestor, senha)
+    await fraudeSenha(gestor, senha)
     salvarContasGestao(contasGestao)
     if (gestor.bloqueado === true) {
         return res.json({ erro: "Acesso bloqueado!"})
