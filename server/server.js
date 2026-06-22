@@ -5,7 +5,10 @@ import { carregarContas, salvarContas } from '../User/src/accountsUser.js';
 import { dataHora } from '../User/src/utils.js';
 import { carregarContasGestao, salvarContasGestao} from '../Management/src/accountsManagement.js'
 import { fraudeSenha } from '../User/src/security.js';
-
+import { autenticadorManager } from './middlewares/auth.js';
+import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+dotenv.config()
 
 let contasGestao = [];
 let contasUser = [];
@@ -130,23 +133,26 @@ app.post('/loginGestao', (req, res) => {
         return res.json({ erro: "Senha inválida!"})
     }
 
-    gestor.token = crypto.randomUUID()
-    salvarContasGestao(contasGestao)
-
-    return res.json({
-        token: gestor.token,
+    const token = jwt.sign(
+        {email: gestor.email,
+            tipo: gestor.tipo,},
+        process.env.JWT_SECRET,
+        {expiresIn: '1h'}
+    )
+    res.json({
+        token: token,
         email: gestor.email,
-        tipo: gestor.tipo 
+        tipo: gestor.tipo
     })
 })
 
 // ROTA DE LISTA DE CONTAS CADASTRADAS 
-app.get('/gerente/contas', (req, res) => {
+app.get('/gerente/contas', autenticadorManager, (req, res) => {
     return res.json(contasUser)
 })
 
 // ROTA BUSCA DE CONTA POR CPF
-app.get('/gerente/contas/:cpf', (req,res) => {
+app.get('/gerente/contas/:cpf', autenticadorManager, (req,res) => {
     const {cpf} = req.params
     const usuario = contasUser.find(buscarConta => buscarConta.cpf === cpf)
 
@@ -158,7 +164,7 @@ app.get('/gerente/contas/:cpf', (req,res) => {
 })
 
 // ROTA DE ACESSO AO EXTRATO DOS USUÁRIOS
-app.get('/gerente/transacoes', (req, res) => {
+app.get('/gerente/transacoes', autenticadorManager, (req, res) => {
     const extratos = contasUser.map(usuario => usuario.extrato)
 
     return res.json(extratos)
@@ -289,7 +295,7 @@ app.get('/saldo', (req, res) => {
 })
 
 // ROTA DE BLOQUEIO/DESBLOQUEIO CARTÃO DO USUÁRIO
-app.put('/gerente/bloquear/:cpf', (req, res) => {
+app.put('/gerente/bloquear/:cpf', autenticadorManager, (req, res) => {
     const {cpf} = req.params
     const usuario = contasUser.find(buscarConta => buscarConta.cpf === cpf)
 
