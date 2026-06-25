@@ -9,6 +9,8 @@ import { autenticadorManager } from './middlewares/auth.js';
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import bcrypt from 'bcrypt'
+import './db.js'
+import pool from './db.js'
 dotenv.config()
 
 let contasGestao = [];
@@ -23,35 +25,26 @@ app.use(express.json())
 app.post('/cadastroUsuario', async (req, res) => {
     const {tipo, cpf, nome, senha} = req.body
 
-        const cpfduplicado = contasUser.find(usuario => usuario.cpf === cpf)
-            if (cpfduplicado){
+        const cpfduplicado = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
+            if (cpfduplicado.rows.length > 0){
                 return res.json ({ erro: "CPF já cadastrado!"})
             }
 
             const senhaHash = await bcrypt.hash(senha, 10)
 
-            contasUser.push({
-                tipo: tipo,
-                cpf: cpf,
-                nome: nome,
-                senha: senhaHash,
-                saldo: 0,
-                extrato: [],
-                tentativasSenha: 0, 
-                tentativaFraudeSaque: 0,    
-                pontosFraude: 0,
-                saquesConsecutivos: 0,
-                bloqueado: false 
-            }) 
-
-            salvarContas(contasUser)  
+            await pool.query('INSERT INTO users (tipo, cpf, nome, senha) VALUES ($1, $2, $3, $4)',[
+                tipo,
+                cpf,
+                nome,
+                senhaHash
+            ])   
 
     res.json({ mensagem: `Usuário cadastrado com sucesso!`})
 
 })
 
 // ROTA DE CADASTRO DE GESTÃO
-app.post('/cadastroGestao', (req, res) => {
+app.post('/cadastroGestao', async (req, res) => {
     const {nome, email, senha, tipo} = req.body
 
     if (!email.endsWith("@bankjs.com.br")) {
@@ -66,52 +59,50 @@ app.post('/cadastroGestao', (req, res) => {
         return res.json({ erro: "Nome inválido!"})
     }
 
-    const emailDuplicado = contasGestao.find(gestor => gestor.email === email)
-            if (emailDuplicado){
+    const emailDuplicado = await pool.query('SELECT * FROM managers WHERE email = $1', [email])
+            if (emailDuplicado.rows.length > 0 ){
                 return res.json ({ erro: "Email já cadastrado!"})
             }
+    
+    const senhaHash = await bcrypt.hash(senha, 10)
 
-    contasGestao.push({
-        nome: nome,
-        email: email,
-        senha: senha,
-        tentativasSenha: 0,
-        bloqueado: false,
-        tipo: tipo
-    })
-
-    salvarContasGestao(contasGestao)
+    await pool.query('INSERT INTO managers (nome, email, senha, tipo) VALUES ($1, $2, $3, $4)',[
+                nome,
+                email,
+                senhaHash,
+                tipo
+            ])   
 
     return res.json({ mensagem: `Gestor cadastrado com sucesso!`})
 
 })
 
 // ROTA DE LOGIN DE USUÁRIO
-    app.post('/loginUsuario', async (req, res) => {
-        const {nome, senha} = req.body
-        const usuario = contasUser.find(u => u.nome === nome)
+app.post('/loginUsuario', async (req, res) => {
+    const {nome, senha} = req.body
+    const usuario = await pool.query('SELECT * FROM users WHERE nome = $1', [nome])
 
-        if (!usuario) {
-            return res.json({ erro: 'Usuário não encontrado!' })
-        }
-        await fraudeSenha(usuario, senha)
-        salvarContas(contasUser)
-        if (usuario.bloqueado === true) {
-            return res.json({ erro: "Acesso bloqueado!"})
-        } 
+    if (usuario.rows.length === 0) {
+        return res.json({ erro: 'Usuário não encontrado!' })
+    }
+    
+    await fraudeSenha(usuario.rows[0], senha)
+    await pool.query('UPDATE users SET tentativas_senha = $1, bloqueado = $2 WHERE cpf = $3', [usuario.rows[0].tentativas_senha, usuario.rows[0].bloqueado, usuario.rows[0].cpf])
+    if (usuario.rows[0].bloqueado === true) {
+        return res.json({ erro: "Acesso bloqueado!"})
+    } 
 
-        let validacaoSenha = await bcrypt.compare(senha, usuario.senha)
-        if (validacaoSenha === false) {
-            return res.json({ erro: 'Senha inválida!'})
-        }
-        
-        return res.json({
-            nome: usuario.nome,
-            tipo: usuario.tipo,
-            saldo: usuario.saldo
-        })
-
+    let validacaoSenha = await bcrypt.compare(senha, usuario.rows[0].senha)
+    if (validacaoSenha === false) {
+        return res.json({ erro: 'Senha inválida!'})
+    }
+    
+    res.json({
+        nome: nome,
+        tipo: usuario.rows[0].tipo,
+        saldo: usuario.rows[0].saldo
     })
+})
 
 // ROTA DE LOGIN DE GESTÃO
 app.post('/loginGestao', async (req, res) => {
