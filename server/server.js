@@ -315,6 +315,8 @@ app.put('/gerente/bloquear/:cpf', autenticadorManager, async(req, res) => {
     return res.json( {mensagem : usuario.rows[0].bloqueado ? 'Usuário bloqueado!' : 'Usuário desbloqueado!'})
 })
 
-app.listen(3000, () => {
-    console.log("Servidor rodando!")
+const PORT = process.env.PORT || 3000
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`)
 })

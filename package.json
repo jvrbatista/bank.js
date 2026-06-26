@@ -2,8 +2,9 @@
   "name": "javascript",
   "version": "1.0.0",
   "description": "Sistema bancário no terminal feito em JavaScript puro (Node.js).",
-  "main": "bank.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
