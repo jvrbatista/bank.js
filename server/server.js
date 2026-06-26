@@ -72,8 +72,8 @@ app.post('/cadastroGestao', async (req, res) => {
 
 // ROTA DE LOGIN DE USUÁRIO
 app.post('/loginUsuario', async (req, res) => {
-    const {nome, senha} = req.body
-    const usuario = await pool.query('SELECT * FROM users WHERE nome = $1', [nome])
+    const {cpf, senha} = req.body
+    const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
 
     if (usuario.rows.length === 0) {
         return res.json({ erro: 'Usuário não encontrado!' })
@@ -98,7 +98,7 @@ app.post('/loginUsuario', async (req, res) => {
     )
     res.json({
         token: token,
-        nome: nome,
+        cpf: cpf,
         tipo: usuario.rows[0].tipo,
         saldo: usuario.rows[0].saldo
     })
