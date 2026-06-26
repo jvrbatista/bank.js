@@ -1,11 +1,9 @@
 import express from 'express'
-import { depositar } from '../User/src/operations.js';
-import { sacar } from '../User/src/operations.js';
-import { carregarContas, salvarContas } from '../User/src/accountsUser.js';
-import { dataHora } from '../User/src/utils.js';
-import { carregarContasGestao, salvarContasGestao} from '../Management/src/accountsManagement.js'
-import { fraudeSenha } from '../User/src/security.js';
-import { autenticadorManager } from './middlewares/auth.js';
+import { depositar } from '../Functions/operations.js';
+import { sacar } from '../Functions/operations.js';
+import { dataHora } from '../Functions/utils.js';
+import { fraudeSenha } from '../Functions/security.js';
+import { autenticadorManager, autenticadorUser } from './middlewares/auth.js';
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import bcrypt from 'bcrypt'
@@ -13,11 +11,6 @@ import './db.js'
 import pool from './db.js'
 dotenv.config()
 
-let contasGestao = [];
-let contasUser = [];
-
-contasGestao = carregarContasGestao()
-contasUser = carregarContas()
 const app = express()
 app.use(express.json())
 
@@ -97,7 +90,14 @@ app.post('/loginUsuario', async (req, res) => {
         return res.json({ erro: 'Senha inválida!'})
     }
     
+    const token = jwt.sign(
+        {cpf: usuario.rows[0].cpf,
+            tipo: usuario.rows[0].tipo,},
+        process.env.JWT_SECRET,
+        {expiresIn: '1h'}
+    )
     res.json({
+        token: token,
         nome: nome,
         tipo: usuario.rows[0].tipo,
         saldo: usuario.rows[0].saldo
@@ -107,71 +107,71 @@ app.post('/loginUsuario', async (req, res) => {
 // ROTA DE LOGIN DE GESTÃO
 app.post('/loginGestao', async (req, res) => {
     const {email, senha} = req.body
-    const gestor = contasGestao.find(gestorUser => gestorUser.email === email)
+    const gestor = await pool.query('SELECT * FROM managers WHERE email = $1', [email])
 
     
-    if (!gestor) {
+    if (gestor.rows.length === 0) {
         return res.json({ erro: 'Gestor não encontrado!' })
     }
-    await fraudeSenha(gestor, senha)
-    salvarContasGestao(contasGestao)
-    if (gestor.bloqueado === true) {
+    await fraudeSenha(gestor.rows[0], senha)
+    await pool.query('UPDATE managers SET tentativas_senha = $1, bloqueado = $2 WHERE email = $3', [gestor.rows[0].tentativas_senha, gestor.rows[0].bloqueado, gestor.rows[0].email])
+    if (gestor.rows[0].bloqueado === true) {
         return res.json({ erro: "Acesso bloqueado!"})
     } 
-    if (gestor.senha !== senha) {
-        return res.json({ erro: "Senha inválida!"})
-    }
-  
-    if (!gestor.email.endsWith("@bankjs.com.br")) {
+
+    if (!gestor.rows[0].email.endsWith("@bankjs.com.br")) {
         return res.json({ erro: 'Email inválido!'})
-    } 
-    if (gestor.senha.length < 8) {
+    }
+
+    let validacaoSenha = await bcrypt.compare(senha, gestor.rows[0].senha)
+    if (validacaoSenha === false) {
         return res.json({ erro: "Senha inválida!"})
     }
 
     const token = jwt.sign(
-        {email: gestor.email,
-            tipo: gestor.tipo,},
+        {email: gestor.rows[0].email,
+            tipo: gestor.rows[0].tipo,},
         process.env.JWT_SECRET,
         {expiresIn: '1h'}
     )
     res.json({
         token: token,
-        email: gestor.email,
-        tipo: gestor.tipo
+        email: gestor.rows[0].email,
+        tipo: gestor.rows[0].tipo
     })
 })
 
 // ROTA DE LISTA DE CONTAS CADASTRADAS 
-app.get('/gerente/contas', autenticadorManager, (req, res) => {
-    return res.json(contasUser)
+app.get('/gerente/contas', autenticadorManager, async (req, res) => {
+    const contasCadastro = await pool.query('SELECT * FROM users')
+    return res.json(contasCadastro.rows)
 })
 
 // ROTA BUSCA DE CONTA POR CPF
-app.get('/gerente/contas/:cpf', autenticadorManager, (req,res) => {
+app.get('/gerente/contas/:cpf', autenticadorManager, async (req,res) => {
     const {cpf} = req.params
-    const usuario = contasUser.find(buscarConta => buscarConta.cpf === cpf)
+    const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
 
-    if(!usuario) {
+    if(usuario.rows.length === 0) {
         return res.json({ erro: "Usuário não encontrado!"})
     }
 
-    return res.json(usuario)
+    return res.json(usuario.rows)
 })
 
 // ROTA DE ACESSO AO EXTRATO DOS USUÁRIOS
-app.get('/gerente/transacoes', autenticadorManager, (req, res) => {
-    const extratos = contasUser.map(usuario => usuario.extrato)
+app.get('/gerente/transacoes', autenticadorManager, async (req, res) => {
+    const extratos = await pool.query('SELECT * FROM extratouser')
 
-    return res.json(extratos)
+    return res.json(extratos.rows)
 })
 
 // ROTA DE DEPÓSITO DE USUÁRIO
-app.post('/depositarUsuario', (req, res) => {
+app.post('/depositarUsuario', autenticadorUser,async (req, res) => {
     const {cpf, valorDepositar} = req.body
-    const usuario = contasUser.find(buscaConta => buscaConta.cpf === cpf)
+    const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
 
-    if (!usuario) {
+    if (usuario.rows.length === 0) {
         return res.json({ erro: 'Usuário não encontrado!' })
     }
 
@@ -179,28 +179,29 @@ app.post('/depositarUsuario', (req, res) => {
        return res.json({ erro: "Valor inválido!"})
     }
 
-    usuario.saldo = depositar(usuario.saldo, valorDepositar)
-    usuario.extrato.push({
-        tipo: "Depósito",
-        valor: valorDepositar,
-        data: dataHora(),
-        saldo: usuario.saldo
-    })
-    
-    salvarContas(contasUser)
+    usuario.rows[0].saldo = depositar(Number(usuario.rows[0].saldo), Number(valorDepositar))
+    await pool.query('UPDATE users SET saldo = $1 WHERE cpf = $2', [usuario.rows[0].saldo, usuario.rows[0].cpf])
+
+    await pool.query('INSERT INTO extratouser (tipo, valor, data, saldo, user_id) VALUES ($1, $2, $3, $4, $5)', [
+                'DEPÓSITO',
+                valorDepositar,
+                dataHora(),
+                usuario.rows[0].saldo,
+                usuario.rows[0].id
+            ])
 
     return res.json({
-        saldo: usuario.saldo
-    })
-    
+        saldo: usuario.rows[0].saldo
+    }) 
 })
 
 // ROTA DE SAQUE DE USUÁRIO
-app.post('/sacarUsuario', (req, res) => {
+app.post('/sacarUsuario', autenticadorUser,async (req, res) => {
     const {cpf, valorSaque} = req.body
-    const usuario = contasUser.find(u => u.cpf === cpf)
+    const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
 
-    if (!usuario) {
+
+    if (usuario.rows.length === 0) {
         return res.json({ erro: 'Usuário não encontrado!' })
     }
     if (valorSaque <= 0) {
@@ -210,99 +211,108 @@ app.post('/sacarUsuario', (req, res) => {
     if (valorSaque > 1000) {
         return res.json({ erro: "Valor inválido!"})
     }
+    if (valorSaque > usuario.rows[0].saldo) {
+        return res.json({ erro: "Saldo insulficiente!"})
+    }
 
-    usuario.saldo = sacar(usuario.saldo, valorSaque)
-    usuario.extrato.push({
-        tipo: "Saque",
-        valor: valorSaque,
-        data: dataHora(),
-        saldo: usuario.saldo
-    });
+    usuario.rows[0].saldo = sacar(Number(usuario.rows[0].saldo), Number(valorSaque))
+    await pool.query('UPDATE users SET saldo = $1  WHERE cpf = $2', [usuario.rows[0].saldo, usuario.rows[0].cpf])
     
-    salvarContas(contasUser)
+    await pool.query('INSERT INTO extratouser (tipo, valor, data, saldo, user_id) VALUES ($1, $2, $3, $4, $5)', [
+                'SAQUE',
+                valorSaque,
+                dataHora(),
+                usuario.rows[0].saldo,
+                usuario.rows[0].id
+            ])
 
     return res.json({
-        saldo: usuario.saldo
-    })
-    
+        saldo: usuario.rows[0].saldo
+    })  
 })
 
 // ROTA DE TRANSFERÊNCIA DO USUÁRIO
-app.post('/transferir', (req, res) => {
+app.post('/transferir', autenticadorUser,async (req, res) => {
     const {cpf, cpfDestino, valorTransferencia} = req.body
-    const usuario = contasUser.find(buscaConta => buscaConta.cpf === cpf)
-    const contaDestino = contasUser.find(buscaContaDestino => buscaContaDestino.cpf === cpfDestino)
+    const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
+    const contaDestino = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpfDestino])
 
-    if (!usuario) {
+    if (usuario.rows.length === 0) {
         return res.json({ erro: 'Usuário não encontrado!' })
     }
-    if (!contaDestino) {
+    if (contaDestino.rows.length === 0) {
         return res.json({ erro: 'Conta destino não encontrada!' })
     }
     if (valorTransferencia <= 0) {
         return res.json({ erro: "Valor inválido!"})
     }
-    if (usuario.saldo < valorTransferencia) {
+    if (usuario.rows[0].saldo < valorTransferencia) {
         return res.json({ erro: "Saldo insuficiente!"})
-    } else {
-        usuario.saldo -= valorTransferencia
-        usuario.extrato.push({
-            tipo: "Realizou transferência",
-            valor: valorTransferencia,
-            data: dataHora(),
-            saldo: usuario.saldo
-        });
-        contaDestino.saldo += valorTransferencia
-        contaDestino.extrato.push({
-            tipo: "Recebeu transferência",
-            valor: valorTransferencia,
-            data: dataHora(),
-            saldo: contaDestino.saldo
-        });
-        salvarContas(contasUser)
-        return res.json({
-        saldo: usuario.saldo
-        })
-    }       
+    } 
+
+    usuario.rows[0].saldo = Number(usuario.rows[0].saldo) - Number(valorTransferencia)
+    await pool.query('UPDATE users SET saldo = $1  WHERE cpf = $2', [usuario.rows[0].saldo, usuario.rows[0].cpf])
+    
+    await pool.query('INSERT INTO extratouser (tipo, valor, data, saldo, user_id) VALUES ($1, $2, $3, $4, $5)', [
+            'TRANSFERIU',
+            valorTransferencia,
+            dataHora(),
+            usuario.rows[0].saldo,
+            usuario.rows[0].id
+        ])
+
+    contaDestino.rows[0].saldo = Number(contaDestino.rows[0].saldo) + Number(valorTransferencia)
+    await pool.query('UPDATE users SET saldo = $1  WHERE cpf = $2', [contaDestino.rows[0].saldo, contaDestino.rows[0].cpf])
+    
+    await pool.query('INSERT INTO extratouser (tipo, valor, data, saldo, user_id) VALUES ($1, $2, $3, $4, $5)', [
+            'RECEBEU',
+            valorTransferencia,
+            dataHora(),
+            contaDestino.rows[0].saldo,
+            contaDestino.rows[0].id
+        ])
+
+    return res.json({
+    saldo: usuario.rows[0].saldo
+    })        
 })
 
 // ROTA DE EXTRATO DO USUÁRIO
-app.get('/extratoUsuario', (req, res) => {
+app.get('/extratoUsuario', autenticadorUser,async (req, res) => {
     const {cpf} = req.body
-    const usuario = contasUser.find(buscaConta => buscaConta.cpf === cpf)
-    
-    if (!usuario) {
+    const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
+
+    if (usuario.rows.length === 0) {
         return res.json({ erro: 'Usuário não encontrado!' })
     }
 
-    return res.json(usuario.extrato)
+    const usuarioExtrato = await pool.query('SELECT * FROM extratouser WHERE user_id = $1', [usuario.rows[0].id])
+    return res.json(usuarioExtrato.rows)
 })
 
 // ROTA DE SALDO DO USUÁRIO
-app.get('/saldo', (req, res) => {
+app.get('/saldo', autenticadorUser,async (req, res) => {
     const {cpf} = req.body
-    const usuario = contasUser.find(buscarConta => buscarConta.cpf === cpf)
-
-    if(!usuario) {
+    const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
+    if(usuario.rows.length === 0) {
         return res.json({ erro: "Usuário não encontrado!"})
     }
 
-    return res.json(usuario.saldo)
+    return res.json(usuario.rows[0].saldo)
 })
 
 // ROTA DE BLOQUEIO/DESBLOQUEIO CARTÃO DO USUÁRIO
-app.put('/gerente/bloquear/:cpf', autenticadorManager, (req, res) => {
+app.put('/gerente/bloquear/:cpf', autenticadorManager, async(req, res) => {
     const {cpf} = req.params
-    const usuario = contasUser.find(buscarConta => buscarConta.cpf === cpf)
-
-    if(!usuario) {
+    const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
+    if(usuario.rows.length === 0) {
         return res.json({ erro: "Usuário não encontrado!"})
     }
     
-    usuario.bloqueado = !usuario.bloqueado
+    usuario.rows[0].bloqueado = !usuario.rows[0].bloqueado
+    await pool.query('UPDATE users SET bloqueado = $1 WHERE cpf = $2', [usuario.rows[0].bloqueado, usuario.rows[0].cpf])
 
-    salvarContas(contasUser)
-    return res.json( {mensagem : usuario.bloqueado ? 'Usuário bloqueado!' : 'Usuário desbloqueado!'})
+    return res.json( {mensagem : usuario.rows[0].bloqueado ? 'Usuário bloqueado!' : 'Usuário desbloqueado!'})
 })
 
 app.listen(3000, () => {
