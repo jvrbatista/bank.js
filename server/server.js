@@ -9,9 +9,12 @@ import dotenv from 'dotenv'
 import bcrypt from 'bcrypt'
 import './db.js'
 import pool from './db.js'
+import cors from 'cors'
+
 dotenv.config()
 
 const app = express()
+app.use(cors())
 app.use(express.json())
 
 // ROTA DE CADASTRO
