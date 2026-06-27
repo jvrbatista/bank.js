@@ -18,8 +18,8 @@ export default function Login() {
     return (
         <div className="relative min-h-screen bg-black flex flex-col items-center justify-center">
             <ParticlesBackground />
-            <div className="relative z-10 flex flex-col items-center">
-                <img src={logo} alt="BankJS" className="w-115 -mb-20" />
+            <div className="relative z-10 flex flex-col items-center bg-emerald-950/30 backdrop-blur-sm rounded-3xl px-12 py-8 border border-emerald-900/30">
+                <img src={logo} alt="BankJS" className="w-115 -mb-20 mix-blend-screen" />
                 <h1 className="text-white text-8xl font-bold tracking-widest">BANK<span className="text-emerald-500">JS</span></h1>
                 <p className="text-gray-400 text-lg tracking-widest mb-2">BANCO DIGITAL</p>
                 <div className="w-96">
