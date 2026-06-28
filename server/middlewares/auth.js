@@ -43,5 +43,6 @@ export function autenticadorUser(req, res, next) {
         return res.json({ erro: 'Acesso negado!'})
     }
     
+    req.cpf = cpf
     next()
 }
