@@ -2,10 +2,12 @@ import logo from '../assets/logoBankJs.png'
 import {useState} from 'react'
 import api from '../services/api.js'
 import ParticlesBackground from '../components/Particles.jsx'
+import { useNavigate } from 'react-router-dom'
 
 export default function Login() {
     const [cpf, setCpf] = useState('')
     const [senha, setSenha] = useState('')
+    const navigate = useNavigate()
 
     async function handleLogin() {
         const resposta = await api.post('/loginUsuario', { cpf, senha })
@@ -13,6 +15,7 @@ export default function Login() {
         sessionStorage.setItem('token', resposta.data.token)
         setCpf('')
         setSenha('')
+        navigate('/dashboard')
     }
 
     return (

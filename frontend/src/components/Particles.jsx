@@ -1,11 +1,15 @@
+import { useMemo } from 'react'
+
+
 export default function ParticlesBackground() {
-    const particles = Array.from({ length: 60 }, (_, i) => ({
+    const particles = useMemo(() => 
+    Array.from({ length: 60 }, (_, i) => ({
         id: i,
         left: `${Math.random() * 100}%`,
         top: `${Math.random() * 100}%`,
         duration: `${5 + Math.random() * 10}s`,
         delay: `${Math.random() * 5}s`
-    }))
+    })),[])
     
     return (
         <>

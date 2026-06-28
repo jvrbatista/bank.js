@@ -1,5 +1,57 @@
+import logo from '../assets/logoBankJs.png'
+import { useState, useEffect } from 'react'
+import api from '../services/api.js'
+
 export default function Dashboard() {
+    const [saldo, setSaldo] = useState(0)
+    
+    useEffect(() => {
+    async function buscarSaldo() {
+        const token = sessionStorage.getItem('token')
+        const resposta = await api.get('/saldo', {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        setSaldo(resposta.data)
+    }
+    buscarSaldo()
+}, []) 
     return (
-        <div>Dashboard</div>
+        <div className="flex min-h-screen bg-black">
+            <div className="w-64 bg-zinc-900 p-6 flex flex-col">
+                <div className="flex items-center gap-3 mb-8">
+                    <img src={logo} alt="BankJS" className="w-10 mix-blend-screen" />
+                    <h1 className="text-white text-2xl font-bold tracking-widest">
+                        BANK<span className="text-emerald-500">JS</span>
+                    </h1>
+                </div>
+                <nav className="flex flex-col gap-2">
+                    <a href="/dashboard" className="flex items-center gap-3 text-emerald-500 bg-emerald-500/10 px-4 py-3 rounded-xl">
+                        Dashboard
+                    </a>
+                    <a href="/transferencias" className="flex items-center gap-3 text-gray-400 hover:text-white px-4 py-3 rounded-xl">
+                        Transferências
+                    </a>
+                    <a href="/extrato" className="flex items-center gap-3 text-gray-400 hover:text-white px-4 py-3 rounded-xl">
+                        Extrato
+                    </a>
+                </nav>
+                <div className="mt-4 border-t border-zinc-700 pt-4 flex flex-col gap-2">
+                    <span className="text-gray-600 px-4 py-3">Pix</span>
+                    <span className="text-gray-600 px-4 py-3">Cartões</span>
+                    <span className="text-gray-600 px-4 py-3">Investimentos</span>
+                    <span className="text-gray-600 px-4 py-3">Empréstimos</span>
+                    <span className="text-gray-600 px-4 py-3">Seguros</span>
+                    <span className="text-gray-600 px-4 py-3">Configurações</span>
+                    <span className="text-gray-600 px-4 py-3">Sair</span>
+                </div>
+            </div>
+            <div className="flex-1 bg-zinc-800"><div className="flex-1 bg-black p-8">
+            <h2 className="text-white text-2xl font-bold mb-6">Dashboard</h2>
+            <div className="bg-zinc-900 rounded-2xl p-6 w-64">
+                <p className="text-gray-400 text-sm mb-1">Saldo em conta</p>
+                <p className="text-emerald-500 text-3xl font-bold">R$ {saldo}</p>
+            </div>
+        </div></div>
+        </div>
     )
 }
