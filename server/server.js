@@ -282,7 +282,7 @@ app.post('/transferir', autenticadorUser,async (req, res) => {
 
 // ROTA DE EXTRATO DO USUÁRIO
 app.get('/extratoUsuario', autenticadorUser,async (req, res) => {
-    const {cpf} = req.body
+    const cpf = req.cpf
     const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
 
     if (usuario.rows.length === 0) {
@@ -295,7 +295,7 @@ app.get('/extratoUsuario', autenticadorUser,async (req, res) => {
 
 // ROTA DE SALDO DO USUÁRIO
 app.get('/saldo', autenticadorUser,async (req, res) => {
-    const {cpf} = req.body
+    const cpf = req.cpf
     const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
     if(usuario.rows.length === 0) {
         return res.json({ erro: "Usuário não encontrado!"})
