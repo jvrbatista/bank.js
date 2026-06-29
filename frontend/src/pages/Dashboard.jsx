@@ -4,17 +4,31 @@ import api from '../services/api.js'
 
 export default function Dashboard() {
     const [saldo, setSaldo] = useState(0)
+    const [extrato, setExtrato] = useState([])
     
     useEffect(() => {
-    async function buscarSaldo() {
+        async function buscarSaldo() {
+            const token = sessionStorage.getItem('token')
+            const resposta = await api.get('/saldo', {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            setSaldo(resposta.data)
+        }
+        buscarSaldo()
+
+        async function buscarExtrato() {
         const token = sessionStorage.getItem('token')
-        const resposta = await api.get('/saldo', {
+        const resposta = await api.get('/extratoUsuario', {
             headers: { Authorization: `Bearer ${token}` }
         })
-        setSaldo(resposta.data)
+        if (Array.isArray(resposta.data)) {
+            setExtrato(resposta.data)
+            console.log(extrato)
+        }
     }
-    buscarSaldo()
-}, []) 
+        buscarExtrato()
+    }, []) 
+
     return (
         <div className="flex min-h-screen bg-black">
             <div className="w-64 bg-zinc-900 p-6 flex flex-col">
@@ -29,14 +43,13 @@ export default function Dashboard() {
                         Dashboard
                     </a>
                     <a href="/transferencias" className="flex items-center gap-3 text-gray-400 hover:text-white px-4 py-3 rounded-xl">
-                        Transferências
+                        PIX
                     </a>
                     <a href="/extrato" className="flex items-center gap-3 text-gray-400 hover:text-white px-4 py-3 rounded-xl">
                         Extrato
                     </a>
                 </nav>
                 <div className="mt-4 border-t border-zinc-700 pt-4 flex flex-col gap-2">
-                    <span className="text-gray-600 px-4 py-3">Pix</span>
                     <span className="text-gray-600 px-4 py-3">Cartões</span>
                     <span className="text-gray-600 px-4 py-3">Investimentos</span>
                     <span className="text-gray-600 px-4 py-3">Empréstimos</span>
@@ -45,13 +58,45 @@ export default function Dashboard() {
                     <span className="text-gray-600 px-4 py-3">Sair</span>
                 </div>
             </div>
-            <div className="flex-1 bg-zinc-800"><div className="flex-1 bg-black p-8">
-            <h2 className="text-white text-2xl font-bold mb-6">Dashboard</h2>
-            <div className="bg-zinc-900 rounded-2xl p-6 w-64">
-                <p className="text-gray-400 text-sm mb-1">Saldo em conta</p>
-                <p className="text-emerald-500 text-3xl font-bold">R$ {saldo}</p>
+            <div className="flex-1 bg-black p-8">
+                <h2 className="text-white text-2xl font-bold mb-6">Dashboard</h2>
+                <div className="flex gap-4 mb-8">
+                    <div className="bg-zinc-900 rounded-2xl p-6 w-64">
+                        <p className="text-gray-400 text-sm mb-1">Saldo em conta</p>
+                        <p className="text-emerald-500 text-3xl font-bold">R$ {Number(saldo).toFixed(2).replace('.', ',')}</p>
+                    </div>
+                    <div className="bg-zinc-900 rounded-2xl p-6 w-64">
+                        <p className="text-gray-400 text-sm mb-1">Limite disponível</p>
+                        <p className="text-white text-3xl font-bold">R$ 0,00</p>
+                    </div>
+                    <div className="bg-zinc-900 rounded-2xl p-6 w-64">
+                        <p className="text-gray-400 text-sm mb-1">Investimentos</p>
+                        <p className="text-white text-3xl font-bold">R$ 0,00</p>
+                    </div>
+                    <div className="bg-zinc-900 rounded-2xl p-6 w-64">
+                        <p className="text-gray-400 text-sm mb-1">Gastos do mês</p>
+                        <p className="text-white text-3xl font-bold">R$ 0,00</p>
+                    </div>
+                </div>
+                <h2 className="text-white text-2xl font-bold mb-6">Últimas transações</h2>
+                <div className="bg-zinc-900 rounded-2xl p-6">
+                    {extrato.length === 0 ? (
+                        <p className="text-gray-400">Nenhuma transação encontrada.</p>
+                    ) : (
+                        extrato.slice(0, 5).map((item, index) => (
+                            <div key={index} className="flex justify-between items-center py-3 border-b border-zinc-800">
+                                <div>
+                                    <p className="text-white">{item.tipo}</p>
+                                    <p className="text-gray-400 text-sm">{item.data}</p>
+                                </div>
+                                <p className={item.tipo === 'DEPÓSITO' || item.tipo === 'RECEBEU' ? "text-emerald-500" : "text-red-400"}>
+                                {item.tipo === 'DEPÓSITO' || item.tipo === 'RECEBEU' ? '+' : '-'} R$ {Number(item.valor).toFixed(2).replace('.', ',')}
+                                </p>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
-        </div></div>
         </div>
     )
 }
