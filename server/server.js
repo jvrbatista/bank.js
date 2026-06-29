@@ -247,10 +247,10 @@ app.post('/transferir', autenticadorUser,async (req, res) => {
     if (contaDestino.rows.length === 0) {
         return res.json({ erro: 'Conta destino não encontrada!' })
     }
-    if (valorTransferencia <= 0) {
+    if (Number(valorTransferencia) <= 0) {
         return res.json({ erro: "Valor inválido!"})
     }
-    if (usuario.rows[0].saldo < valorTransferencia) {
+    if (Number(usuario.rows[0].saldo) < Number(valorTransferencia)) {
         return res.json({ erro: "Saldo insuficiente!"})
     } 
 
