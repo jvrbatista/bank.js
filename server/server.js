@@ -236,7 +236,8 @@ app.post('/sacarUsuario', autenticadorUser,async (req, res) => {
 
 // ROTA DE TRANSFERÊNCIA DO USUÁRIO
 app.post('/transferir', autenticadorUser,async (req, res) => {
-    const {cpf, cpfDestino, valorTransferencia} = req.body
+    const cpf = req.cpf
+    const {cpfDestino, valorTransferencia} = req.body
     const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
     const contaDestino = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpfDestino])
 
