@@ -29,6 +29,7 @@ export default function Login() {
                     <p className="text-gray-400 mt-8 mb-1">Bem-vindo de volta!</p>
                     <h2 className="text-white text-4xl font-bold mb-6">Acesse <span className="text-emerald-500">sua conta</span></h2>
                     <input 
+                        maxLength={11}
                         value={cpf}
                         onChange={(e) => setCpf(e.target.value)}
                         type="text"
