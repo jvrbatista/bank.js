@@ -1,10 +1,17 @@
 import logo from '../assets/logoBankJs.png'
 import { useState, useEffect } from 'react'
 import api from '../services/api.js'
+import { useNavigate } from 'react-router-dom'
 
 export default function Dashboard() {
     const [saldo, setSaldo] = useState(0)
     const [extrato, setExtrato] = useState([])
+    const navigate = useNavigate()
+
+    function handleSair() {
+        sessionStorage.clear()
+        navigate('/')
+    }
     
     useEffect(() => {
         async function buscarSaldo() {
@@ -55,8 +62,10 @@ export default function Dashboard() {
                     <span className="text-gray-600 px-4 py-3">Empréstimos</span>
                     <span className="text-gray-600 px-4 py-3">Seguros</span>
                     <span className="text-gray-600 px-4 py-3">Configurações</span>
-                    <span className="text-gray-600 px-4 py-3">Sair</span>
                 </div>
+                <button onClick={handleSair} className="flex items-center gap-3 text-gray-400 hover:text-white px-4 py-3 rounded-xl">
+                    Sair
+                </button>
             </div>
             <div className="flex-1 bg-black p-8">
                 <h2 className="text-white text-2xl font-bold mb-6">Dashboard</h2>

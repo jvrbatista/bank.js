@@ -1,5 +1,5 @@
 import logo from '../assets/logoBankJs.png'
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import api from '../services/api.js'
 import ParticlesBackground from '../components/Particles.jsx'
 import { useNavigate } from 'react-router-dom'
@@ -18,6 +18,13 @@ export default function Login() {
         navigate('/dashboard')
     }
 
+    useEffect(() => {
+        const token = sessionStorage.getItem('token')
+        if (token) {
+            navigate('/dashboard')
+        }
+    }, [])
+
     return (
         <div className="relative min-h-screen bg-black flex flex-col items-center justify-center">
             <ParticlesBackground />
@@ -28,19 +35,21 @@ export default function Login() {
                 <div className="w-96">
                     <p className="text-gray-400 mt-8 mb-1">Bem-vindo de volta!</p>
                     <h2 className="text-white text-4xl font-bold mb-6">Acesse <span className="text-emerald-500">sua conta</span></h2>
+                    <p className="text-gray-400 mt-8 mb-1">CPF</p>
                     <input 
                         maxLength={11}
                         value={cpf}
                         onChange={(e) => setCpf(e.target.value)}
                         type="text"
-                        placeholder="CPF"
+                        placeholder="Digite seu CPF"
                         className="w-full bg-zinc-900 border border-zinc-700 text-white rounded-xl px-4 py-3 mb-4 focus:outline-none focus:border-emerald-500"
                     />
+                    <p className="text-gray-400 mt-8 mb-1">Senha</p>
                     <input 
                         value={senha}
                         onChange={(e) => setSenha(e.target.value)}
                         type="password"
-                        placeholder="Senha"
+                        placeholder="Digite sua senha"
                         className="w-full bg-zinc-900 border border-zinc-700 text-white rounded-xl px-4 py-3 mb-4 focus:outline-none focus:border-emerald-500"
                     />
                     <button
@@ -51,6 +60,9 @@ export default function Login() {
                         Entrar
                     </button>
                 </div>
+                <p className ="text-gray-400 text-center text-sm mt-2">
+                    Não tem conta? <a href="/cadastro" className="text-emerald-500 houver:underline">Criar conta</a>
+                </p>
             </div>
         </div>
     )
