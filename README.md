@@ -1,7 +1,5 @@
 # BankJS 🏦
 
-<div align="center">
-
 ![Status](https://img.shields.io/badge/status-fase%201%20completa-brightgreen)
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
@@ -19,8 +17,6 @@
 ![License](https://img.shields.io/badge/licença-MIT-blue)
 
 **Aplicação bancária digital full stack — do terminal ao deploy em produção.**
-
-</div>
 
 ---
 
