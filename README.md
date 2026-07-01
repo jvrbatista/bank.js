@@ -3,12 +3,19 @@
 <div align="center">
 
 ![Status](https://img.shields.io/badge/status-fase%201%20completa-brightgreen)
+
 ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
+
 ![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white)
+
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?logo=postgresql&logoColor=white)
+
 ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
+
 ![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white)
+
 ![Railway](https://img.shields.io/badge/Railway-0B0D0E?logo=railway&logoColor=white)
+
 ![License](https://img.shields.io/badge/licença-MIT-blue)
 
 **Aplicação bancária digital full stack — do terminal ao deploy em produção.**
