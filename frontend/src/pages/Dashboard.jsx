@@ -92,7 +92,7 @@ export default function Dashboard() {
                     {extrato.length === 0 ? (
                         <p className="text-gray-400">Nenhuma transação encontrada.</p>
                     ) : (
-                        extrato.slice(0, 5).map((item, index) => (
+                        [...extrato].reverse().slice(0, 5).map((item, index) => (
                             <div key={index} className="flex justify-between items-center py-3 border-b border-zinc-800">
                                 <div>
                                     <p className="text-white">{item.tipo}</p>
