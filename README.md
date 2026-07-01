@@ -13,8 +13,6 @@
 
 **Aplicação bancária digital full stack — do terminal ao deploy em produção.**
 
-[🔗 Acessar o sistema](https://bankjs-app-production.up.railway.app) · [📋 API](https://bankjs-production.up.railway.app) · [🐛 Reportar bug](https://github.com/jvrbatista/bank.js/issues)
-
 </div>
 
 ---
