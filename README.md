@@ -1,138 +1,202 @@
-# BankJS 💰
+# BankJS 🏦
 
-
+<div align="center">
 
 ![Status](https://img.shields.io/badge/status-fase%201%20completa-brightgreen)
-
-
-
-
 ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
-
-
-
-
 ![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white)
-
-
-
-
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?logo=postgresql&logoColor=white)
-
-
-
-
 ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
-
-
-
-
 ![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white)
-
-
-
-
 ![Railway](https://img.shields.io/badge/Railway-0B0D0E?logo=railway&logoColor=white)
-
-
-
-
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
-
-
-
-
 ![License](https://img.shields.io/badge/licença-MIT-blue)
 
+**Aplicação bancária digital full stack — do terminal ao deploy em produção.**
 
+[🔗 Acessar o sistema](https://bankjs-app-production.up.railway.app) · [📋 API](https://bankjs-production.up.railway.app) · [🐛 Reportar bug](https://github.com/jvrbatista/bank.js/issues)
 
-API REST bancária full stack construída com Node.js + Express e React, desenvolvida como projeto de portfólio para aplicação de conceitos de back-end, segurança e deploy em nuvem.
+</div>
+
+---
+
+## 📌 Sobre o projeto
+
+O BankJS é uma aplicação bancária digital construída do zero como projeto de portfólio. O objetivo foi aplicar na prática conceitos reais de desenvolvimento backend: autenticação segura, banco de dados relacional, arquitetura REST e deploy em nuvem.
+
+O projeto evoluiu em fases — começou como um sistema de terminal em JavaScript puro e se tornou uma aplicação full stack completa, com frontend em React e backend deployado no Railway.
+
+---
 
 ## 🔗 Deploy
 
-- **Frontend:** [bankjs-app-production.up.railway.app](https://bankjs-app-production.up.railway.app)
-- **Backend:** [bankjs-production.up.railway.app](https://bankjs-production.up.railway.app)
+| Serviço | URL |
+|---|---|
+| Frontend | [bankjs-app-production.up.railway.app](https://bankjs-app-production.up.railway.app) |
+| Backend | [bankjs-production.up.railway.app](https://bankjs-production.up.railway.app) |
 
-## 📖 Sobre o projeto
-
-O BankJS começou como um sistema de terminal e evoluiu para uma aplicação full stack completa. O backend foi construído com foco em boas práticas de segurança: autenticação JWT, criptografia de senhas com bcrypt, queries parametrizadas para prevenção de SQL injection e banco de dados relacional com PostgreSQL usando SQL puro.
+---
 
 ## ✅ Funcionalidades
 
-**Usuário**
-- Cadastro com validação de CPF (11 dígitos) e hash bcrypt na senha
-- Login com JWT (1h) e bloqueio automático após 3 tentativas erradas
-- Depósito, saque e transferência/PIX com validações
-- Extrato completo de transações com data e hora
+### Usuário
+- Cadastro com validação de CPF (exatamente 11 dígitos) e verificação de duplicidade
+- Login com autenticação JWT (expira em 1h)
+- Bloqueio automático após 3 tentativas de senha incorretas
+- Depósito, saque e transferência via PIX com validações de saldo
+- Extrato completo de transações com data/hora no fuso de Brasília
 - Consulta de saldo em tempo real
 
-**Gestão** *(backend pronto — frontend na Fase 2)*
-- Cadastro de gestores com email corporativo (@bankjs.com.br)
-- Autenticação com JWT separado
-- Listagem, busca e bloqueio de contas de usuários
-- Visualização de todas as transações
+### Gestão *(backend pronto — frontend na Fase 2)*
+- Cadastro de gestores com email corporativo obrigatório (`@bankjs.com.br`)
+- Autenticação separada com JWT próprio
+- Rotas administrativas protegidas por middleware específico
 
-**Segurança**
-- Senhas armazenadas com hash bcrypt
-- Autenticação via JWT em todas as rotas protegidas
-- Queries parametrizadas contra SQL injection
-- Credenciais no `.env` — nunca expostas no código
-- CORS configurado para produção
+### Segurança
+- Senhas armazenadas com hash **bcrypt** — nunca em texto puro
+- Todas as rotas protegidas com **JWT** via middleware
+- Queries **parametrizadas** — prevenção de SQL injection
+- **CORS** configurado para aceitar apenas origens autorizadas
+- Credenciais em variáveis de ambiente — nunca expostas no código
 
-## 🗄️ Banco de dados
-
-PostgreSQL com SQL puro via biblioteca `pg` — sem ORM, para construção sólida de fundamentos SQL.
-
-**Tabelas:**
-- `users` — dados do usuário, saldo, tentativas e status de bloqueio
-- `extratouser` — transações vinculadas por chave estrangeira
-- `managers` — gestores com autenticação separada
+---
 
 ## 🛠️ Stack
 
-**Backend**
-- Node.js + Express 5
-- PostgreSQL + `pg` (SQL puro)
-- JWT (`jsonwebtoken`)
-- bcrypt
-- dotenv
-- CORS
+### Backend
+- **Node.js** + **Express 5** com ES Modules
+- **PostgreSQL** via biblioteca `pg` — SQL puro, sem ORM
+- **JWT** (`jsonwebtoken`) para autenticação stateless
+- **bcrypt** para hash de senhas
+- **dotenv** para variáveis de ambiente
+- **CORS** para controle de origens
 
-**Frontend**
-- React + Vite
-- Tailwind CSS v4
-- React Router DOM
-- Axios
+### Frontend
+- **React** + **Vite**
+- **Tailwind CSS v4** via plugin Vite
+- **React Router DOM** para navegação SPA
+- **Axios** para requisições HTTP
 
-**Deploy**
-- Railway (backend + PostgreSQL + frontend)
+### Infraestrutura
+- **Railway** — backend, frontend e PostgreSQL gerenciado
 
-## 🗺️ Roadmap
+---
 
-- ✅ Fase 1 — Sistema de terminal
-- ✅ Fase 2 — API REST com Express
-- ✅ Fase 3 — Refatoração em módulos
-- ✅ Fase 4 — Área de gestão (backend)
-- ✅ Fase 5 — Autenticação JWT + bcrypt
-- ✅ Fase 6 — Migração para PostgreSQL
-- ✅ Fase 7 — Deploy no Railway
-- ✅ Fase 8 — Frontend React
-- ⏳ Fase 9 — Refatoração MVC + área de gestão (frontend) + novas features
+## 🗄️ Banco de dados
+
+PostgreSQL com SQL puro — escolha intencional para construir fundamentos sólidos sem a abstração de ORMs.
+
+### Tabelas
+
+**`users`**
+| Coluna | Tipo | Descrição |
+|---|---|---|
+| id | SERIAL | Chave primária |
+| tipo | VARCHAR | Corrente ou Poupança |
+| nome | VARCHAR | Nome completo |
+| cpf | VARCHAR(11) | CPF único |
+| senha | VARCHAR | Hash bcrypt |
+| saldo | NUMERIC | Saldo atual |
+| tentativas_senha | INT | Contador de tentativas incorretas |
+| bloqueado | BOOLEAN | Status de bloqueio |
+
+**`extratouser`**
+| Coluna | Tipo | Descrição |
+|---|---|---|
+| id | SERIAL | Chave primária |
+| user_id | INT | FK → users.id |
+| tipo | VARCHAR | DEPÓSITO, SAQUE, TRANSFERIU, RECEBEU |
+| valor | NUMERIC | Valor da transação |
+| data | VARCHAR | Data/hora formatada (pt-BR) |
+| saldo | NUMERIC | Saldo após a transação |
+
+---
 
 ## 🚀 Como rodar localmente
 
+### Pré-requisitos
+- Node.js 18+
+- PostgreSQL instalado e rodando
+
+### Instalação
+
 ```bash
-# Instalar dependências do backend
+# Clone o repositório
+git clone https://github.com/jvrbatista/bank.js.git
+cd bank.js
+
+# Instale as dependências do backend
 npm install
 
-# Configurar variáveis de ambiente
+# Configure as variáveis de ambiente
 cp .env.example .env
-# Preencha DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD e JWT_SECRET
+# Edite o .env com suas credenciais
+```
 
-# Rodar o servidor
+### Variáveis de ambiente
+
+```env
+DATABASE_URL=postgresql://usuario:senha@host:porta/banco
+JWT_SECRET=sua_chave_secreta_aqui
+NODE_ENV=development
+```
+
+### Executando
+
+```bash
+# Backend (porta 3000)
 node server/server.js
 
-# Frontend
+# Frontend (porta 5173)
 cd frontend
 npm install
 npm run dev
+```
+
+---
+
+## 📡 Endpoints da API
+
+### Usuário
+| Método | Rota | Descrição | Auth |
+|---|---|---|---|
+| POST | `/cadastroUsuario` | Cadastrar usuário | ❌ |
+| POST | `/loginUsuario` | Login e geração de JWT | ❌ |
+| GET | `/saldo` | Consultar saldo | ✅ |
+| GET | `/extratoUsuario` | Listar transações | ✅ |
+| POST | `/depositar` | Realizar depósito | ✅ |
+| POST | `/sacar` | Realizar saque | ✅ |
+| POST | `/transferir` | Transferência via PIX | ✅ |
+
+### Gestão
+| Método | Rota | Descrição | Auth |
+|---|---|---|---|
+| POST | `/cadastroGestao` | Cadastrar gestor | ❌ |
+| POST | `/loginGestao` | Login de gestor | ❌ |
+
+> ✅ Requer header `Authorization: Bearer <token>`
+
+---
+
+## 🗺️ Roadmap
+
+- ✅ **Fase 1** — Sistema de terminal em JavaScript puro
+- ✅ **Fase 2** — Migração para API REST com Express
+- ✅ **Fase 3** — Refatoração em módulos (operations, security, utils)
+- ✅ **Fase 4** — Área de gestão no backend
+- ✅ **Fase 5** — Autenticação JWT + bcrypt
+- ✅ **Fase 6** — Migração para PostgreSQL com SQL puro
+- ✅ **Fase 7** — Deploy no Railway
+- ✅ **Fase 8** — Frontend React com 4 páginas funcionais
+- ⏳ **Fase 9** — Refatoração MVC, área de gestão no frontend, novas features
+
+---
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+<div align="center">
+  Feito por <a href="https://github.com/jvrbatista">João Victor</a>
+</div>
