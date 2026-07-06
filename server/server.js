@@ -12,6 +12,10 @@ app.use(express.json())
 app.use(usuarioRoutes)
 app.use(gestaoRoutes)
 
+app.use((err, req, res, next) => {
+    console.log(err)
+    res.status(500).json({ erro: 'Erro interno do servidor' })
+})
 
 const PORT = process.env.PORT || 3000
 

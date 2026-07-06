@@ -2,8 +2,6 @@ import pool from '../db.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { fraudeSenha } from '../../Functions/security.js'
-import { depositar, sacar } from '../../Functions/operations.js'
-import { dataHora } from '../../Functions/utils.js'
 
 export async function loginGestao(req, res) {
     const {email, senha} = req.body
@@ -11,21 +9,22 @@ export async function loginGestao(req, res) {
 
     
     if (gestor.rows.length === 0) {
-        return res.json({ erro: 'Gestor não encontrado!' })
+        return res.status(404).json({ erro: 'Gestor não encontrado!' })
     }
-    await fraudeSenha(gestor.rows[0], senha)
-    await pool.query('UPDATE managers SET tentativas_senha = $1, bloqueado = $2 WHERE email = $3', [gestor.rows[0].tentativas_senha, gestor.rows[0].bloqueado, gestor.rows[0].email])
+
     if (gestor.rows[0].bloqueado === true) {
-        return res.json({ erro: "Acesso bloqueado!"})
-    } 
+        return res.status(403).json({ erro: "Acesso bloqueado!"})
+    }
+
+    const validacaoSenha = await fraudeSenha(gestor.rows[0], senha)
+    await pool.query('UPDATE managers SET tentativas_senha = $1, bloqueado = $2 WHERE email = $3', [gestor.rows[0].tentativas_senha, gestor.rows[0].bloqueado, gestor.rows[0].email])
+    
+    if (validacaoSenha === false) {
+        return res.status(401).json({ erro: "Senha inválida!"})
+    }
 
     if (!gestor.rows[0].email.endsWith("@bankjs.com.br")) {
-        return res.json({ erro: 'Email inválido!'})
-    }
-
-    let validacaoSenha = await bcrypt.compare(senha, gestor.rows[0].senha)
-    if (validacaoSenha === false) {
-        return res.json({ erro: "Senha inválida!"})
+        return res.status(400).json({ erro: 'Email inválido!'})
     }
 
     const token = jwt.sign(
@@ -45,20 +44,20 @@ export async function cadastroGestao(req, res) {
     const {nome, email, senha, tipo} = req.body
 
     if (!email.endsWith("@bankjs.com.br")) {
-        return res.json({ erro: 'Email inválido!'})
+        return res.status(400).json({ erro: 'Email inválido!'})
     }
 
     if (senha.length < 8) {
-        return res.json({ erro: "Senha inválida!"})
+        return res.status(400).json({ erro: "Senha inválida!"})
     }
     
     if (!nome.includes(" ")) {
-        return res.json({ erro: "Nome inválido!"})
+        return res.status(400).json({ erro: "Nome inválido!"})
     }
 
     const emailDuplicado = await pool.query('SELECT * FROM managers WHERE email = $1', [email])
             if (emailDuplicado.rows.length > 0 ){
-                return res.json ({ erro: "Email já cadastrado!"})
+                return res.status(409).json ({ erro: "Email já cadastrado!"})
             }
     
     const senhaHash = await bcrypt.hash(senha, 10)
@@ -78,7 +77,7 @@ export async function buscarContaPorCpf(req, res) {
     const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
 
     if(usuario.rows.length === 0) {
-        return res.json({ erro: "Usuário não encontrado!"})
+        return res.status(404).json({ erro: "Usuário não encontrado!"})
     }
 
     return res.json(usuario.rows)
@@ -99,7 +98,7 @@ export async function bloquearContaPorCpf(req, res) {
     const {cpf} = req.params
     const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
     if(usuario.rows.length === 0) {
-        return res.json({ erro: "Usuário não encontrado!"})
+        return res.status(404).json({ erro: "Usuário não encontrado!"})
     }
     
     usuario.rows[0].bloqueado = !usuario.rows[0].bloqueado
@@ -107,5 +106,3 @@ export async function bloquearContaPorCpf(req, res) {
 
     return res.json( {mensagem : usuario.rows[0].bloqueado ? 'Usuário bloqueado!' : 'Usuário desbloqueado!'})
 }
-
-

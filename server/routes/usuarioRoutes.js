@@ -1,14 +1,16 @@
 import express from 'express'
 import { loginUsuario, cadastroUsuario, saldo, extratoUsuario, depositarUsuario, sacarUsuario, transferir } from '../controllers/usuarioControllers.js'
 import { autenticadorUser } from '../middlewares/auth.js'
+import { asyncHandler } from '../middlewares/asyncHandler.js'
 const router = express.Router()
 
-router.post('/loginUsuario', loginUsuario)
-router.post('/cadastroUsuario', cadastroUsuario)
-router.get('/saldo', autenticadorUser, saldo)
-router.get('/extratoUsuario', autenticadorUser, extratoUsuario)
-router.post('/depositarUsuario', depositarUsuario)
-router.post('/sacarUsuario', sacarUsuario)
-router.post('/transferir', autenticadorUser, transferir)
+
+router.post('/loginUsuario', asyncHandler(loginUsuario))
+router.post('/cadastroUsuario', asyncHandler(cadastroUsuario))
+router.get('/saldo', autenticadorUser, asyncHandler(saldo))
+router.get('/extratoUsuario', autenticadorUser, asyncHandler(extratoUsuario))
+router.post('/depositarUsuario', asyncHandler(depositarUsuario))
+router.post('/sacarUsuario', asyncHandler(sacarUsuario))
+router.post('/transferir', autenticadorUser, asyncHandler(transferir))
 
 export default router

@@ -13,4 +13,5 @@ export async function fraudeSenha(usuarioLogado, senhaCadastro) {
     } else {
         usuarioLogado.tentativas_senha = 0;
     }
+    return senhaCorreta
 }
