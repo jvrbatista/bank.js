@@ -189,7 +189,8 @@ npm run dev
 - ✅ **Fase 7** — Deploy no Railway
 - ✅ **Fase 8** — Frontend React com 4 páginas funcionais
 - ✅ **Fase 9** — Refatoração MVC (routes/controllers)
-- ⏳ **Fase 10** — Área de gestão no frontend + tratamento de erros robusto + novas features
+- ✅ **Fase 10** — Tratamento de erros (status codes, asyncHandler, middleware central)
+- ⏳  **Fase 11** — Área de gestão no frontend
 
 ---
 
