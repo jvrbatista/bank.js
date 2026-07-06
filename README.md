@@ -1,6 +1,6 @@
 # BankJS 🏦
 
-![Status](https://img.shields.io/badge/status-fase%201%20completa-brightgreen)
+![Status](https://img.shields.io/badge/status-fase%2010%20completa-brightgreen)
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
 
@@ -47,7 +47,7 @@ O projeto evoluiu em fases — começou como um sistema de terminal em JavaScrip
 - Extrato completo de transações com data/hora no fuso de Brasília
 - Consulta de saldo em tempo real
 
-### Gestão *(backend pronto — frontend na Fase 2)*
+### Gestão *(backend pronto com tratamento de erros — frontend na Fase 11)*
 - Cadastro de gestores com email corporativo obrigatório (`@bankjs.com.br`)
 - Autenticação separada com JWT próprio
 - Rotas administrativas protegidas por middleware específico
@@ -189,8 +189,8 @@ npm run dev
 - ✅ **Fase 7** — Deploy no Railway
 - ✅ **Fase 8** — Frontend React com 4 páginas funcionais
 - ✅ **Fase 9** — Refatoração MVC (routes/controllers)
-- ✅ **Fase 10** — Tratamento de erros (status codes, asyncHandler, middleware central)
-- ⏳  **Fase 11** — Área de gestão no frontend
+- ✅ **Fase 10** — Tratamento de erros robusto (status codes HTTP, asyncHandler, middleware de erro central, correção de bug de segurança no bloqueio por tentativas)
+- ⏳ **Fase 11** — Área de gestão no frontend + novas features
 
 ---
 
