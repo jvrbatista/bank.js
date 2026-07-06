@@ -188,7 +188,8 @@ npm run dev
 - ✅ **Fase 6** — Migração para PostgreSQL com SQL puro
 - ✅ **Fase 7** — Deploy no Railway
 - ✅ **Fase 8** — Frontend React com 4 páginas funcionais
-- ⏳ **Fase 9** — Refatoração MVC, área de gestão no frontend, novas features
+- ✅ **Fase 9** — Refatoração MVC (routes/controllers)
+- ⏳ **Fase 10** — Área de gestão no frontend + tratamento de erros robusto + novas features
 
 ---
 
