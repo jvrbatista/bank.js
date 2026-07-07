@@ -8,15 +8,19 @@ export default function Login() {
     const [cpf, setCpf] = useState('')
     const [senha, setSenha] = useState('')
     const navigate = useNavigate()
+    const [erro, setErro] = useState('')
 
     async function handleLogin() {
+        try {
         const resposta = await api.post('/loginUsuario', { cpf, senha })
         console.log(resposta.data)
         sessionStorage.setItem('token', resposta.data.token)
         setCpf('')
         setSenha('')
         navigate('/dashboard')
-    }
+    } catch (error) {
+        setErro(error.response.data.erro)
+    }}
 
     useEffect(() => {
         const token = sessionStorage.getItem('token')
@@ -28,6 +32,18 @@ export default function Login() {
     return (
         <div className="relative min-h-screen bg-black flex flex-col items-center justify-center">
             <ParticlesBackground />
+
+            {erro && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-zinc-900 border border-red-500 rounded-2xl p-6 w-80">
+                        <p className="text-white">{erro}</p>
+                        <button onClick={() => setErro('')} className="mt-4 bg-red-500 text-white rounded-xl px-4 py-2 w-full">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            )}
+            
             <div className="relative z-10 flex flex-col items-center bg-emerald-950/30 backdrop-blur-sm rounded-3xl px-12 py-8 border border-emerald-900/30">
                 <img src={logo} alt="BankJS" className="w-115 -mb-20 mix-blend-screen" />
                 <h1 className="text-white text-8xl font-bold tracking-widest">BANK<span className="text-emerald-500">JS</span></h1>
