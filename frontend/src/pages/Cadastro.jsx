@@ -10,8 +10,10 @@ export default function Cadastro() {
     const [cpf, setCpf] = useState('')
     const [senha, setSenha] = useState('')
     const navigate = useNavigate()
+    const [erro, setErro] = useState('')
 
     async function handleCadastro() {
+        try {
         const resposta = await api.post('/cadastroUsuario', {tipo, cpf, nome, senha})
         console.log(resposta.data)
         setTipo('')
@@ -19,11 +21,25 @@ export default function Cadastro() {
         setCpf('')
         setSenha('')
         navigate('/')
-    }
+    } catch (error) {
+        setErro(error.response?.data?.erro || 'Erro ao conectar com o servidor')
+    }}
 
     return (
         <div className="relative min-h-screen bg-black flex flex-col items-center justify-center">
             <ParticlesBackground />
+
+            {erro && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-zinc-900 border border-red-500 rounded-2xl p-6 w-80">
+                        <p className="text-white">{erro}</p>
+                        <button onClick={() => setErro('')} className="mt-4 bg-red-500 text-white rounded-xl px-4 py-2 w-full">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="relative z-10 flex flex-col items-center bg-emerald-950/30 backdrop-blur-sm rounded-3xl px-12 py-8 border border-emerald-900/30">
                 <img src={logo} alt="BankJS" className="w-115 -mb-20 mix-blend-screen" />
                 <h1 className="text-white text-8xl font-bold tracking-widest">BANK<span className="text-emerald-500">JS</span></h1>

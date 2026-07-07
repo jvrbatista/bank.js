@@ -19,7 +19,7 @@ export default function Login() {
         setSenha('')
         navigate('/dashboard')
     } catch (error) {
-        setErro(error.response.data.erro)
+        setErro(error.response?.data?.erro || 'Erro ao conectar com o servidor')
     }}
 
     useEffect(() => {

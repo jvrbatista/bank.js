@@ -3,12 +3,14 @@ import { useState, useEffect } from 'react'
 import api from '../services/api.js'
 import { useNavigate } from 'react-router-dom'
 
+
 export default function Transferencias() {
     const [cpfDestino, setCpfDestino] = useState('')
     const [valor, setValor] = useState('')
     const [cpfUsuario, setCpfUsuario] = useState('')
     const [saldo, setSaldo] = useState(0)
     const navigate = useNavigate()
+    const [erro, setErro] = useState('')
 
     function handleSair() {
         sessionStorage.clear()
@@ -31,6 +33,7 @@ export default function Transferencias() {
     }, [])
 
     async function handleTransferir() {
+        try {
         const token = sessionStorage.getItem('token')
         const resposta = await api.post('/transferir', 
             { cpfDestino, valorTransferencia: valor },
@@ -40,7 +43,9 @@ export default function Transferencias() {
         setCpfDestino('')
         setValor('')
         setSaldo(resposta.data.saldo)
-    }
+    } catch(error) {
+        setErro(error.response?.data?.erro || 'Erro ao conectar com o servidor')
+    }}
 
     return (
         <div className="flex min-h-screen bg-black">
@@ -67,6 +72,16 @@ export default function Transferencias() {
                     Sair
                 </button>
             </div>
+            {erro && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-zinc-900 border border-red-500 rounded-2xl p-6 w-80">
+                        <p className="text-white">{erro}</p>
+                        <button onClick={() => setErro('')} className="mt-4 bg-red-500 text-white rounded-xl px-4 py-2 w-full">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            )}
             <div className="flex-1 bg-black p-8 flex flex-col">
                 <h2 className="text-white text-2xl font-bold mb-6">PIX</h2>
                 <div className="flex flex-col justify-center items-center flex-1">
