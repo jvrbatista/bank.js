@@ -58,25 +58,25 @@ export default function DashboardGestao() {
                     <table className="w-full text-left">
                         <thead>
                         <tr className="text-xs text-gray-400 uppercase tracking-wider">
-                            <th className="pb-3">Nome</th>
-                            <th className="pb-3">CPF</th>
-                            <th className="pb-3">Tipo</th>
-                            <th className="pb-3">Saldo</th>
-                            <th className="pb-3">Status</th>
+                            <th className="pb-3 pr-4">Nome</th>
+                            <th className="pb-3 pr-4">CPF</th>
+                            <th className="pb-3 pr-4">Tipo</th>
+                            <th className="pb-3 pr-4">Saldo</th>
+                            <th className="pb-3 pr-4">Status</th>
                             <th className="pb-3">Ação</th>
                         </tr>
                         </thead>
                         <tbody>
-            
                         {contas.map((conta) => {
-                            const status = conta.bloqueado ? 'Usuário bloqueado!' : 'Usuário desbloqueado!'
+                            const status = conta.bloqueado ? 'Bloqueado' : 'Ativo'
+                            const corStatus = conta.bloqueado ? 'text-red-400' : 'text-emerald-500'
                             return (<tr key={conta.cpf} className="border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors">
-                            <td>{conta.nome}</td>
-                            <td>{conta.cpf}</td>
-                            <td>{conta.tipo}</td>
-                            <td>{conta.saldo}</td>
-                            <td>{status}</td>
-                            <td>{}</td>
+                            <td className="py-3 pr-4 text-white">{conta.nome}</td>
+                            <td className="py-3 pr-4 text-gray-400">{conta.cpf}</td>
+                            <td className="py-3 pr-4 text-gray-400">{conta.tipo}</td>
+                            <td className="py-3 pr-4 text-white">R$ {Number(conta.saldo).toFixed(2).replace('.', ',')}</td>
+                            <td className={`py-3 pr-4 font-semibold ${corStatus}`}>{status}</td>
+                            <td className="py-3">{}</td>
                             </tr>
                         )})}
                         </tbody>
