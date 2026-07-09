@@ -4,6 +4,7 @@ import Cadastro from './pages/Cadastro'
 import Dashboard from './pages/Dashboard'
 import Extrato from './pages/Extrato'
 import Transferencias from './pages/Transferencias'
+import RotaPrivada from './components/RotaPrivada'
 
 
 export default function App() {
@@ -12,9 +13,9 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Login />} />
                 <Route path="/cadastro" element={<Cadastro />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/extrato" element={<Extrato />} />
-                <Route path="/transferencias" element={<Transferencias />} />
+                <Route path="/dashboard" element={<RotaPrivada><Dashboard /></RotaPrivada>} />
+                <Route path="/extrato" element={<RotaPrivada><Extrato /></RotaPrivada>} />
+                <Route path="/transferencias" element={<RotaPrivada><Transferencias /></RotaPrivada>} />
             </Routes>
         </BrowserRouter>
     )

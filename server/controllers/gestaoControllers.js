@@ -74,7 +74,7 @@ export async function cadastroGestao(req, res) {
 
 export async function buscarContaPorCpf(req, res) {
     const {cpf} = req.params
-    const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
+    const usuario = await pool.query('SELECT id, tipo, nome, cpf, saldo, tentativas_senha, bloqueado FROM users WHERE cpf = $1', [cpf])
 
     if(usuario.rows.length === 0) {
         return res.status(404).json({ erro: "Usuário não encontrado!"})
@@ -84,7 +84,7 @@ export async function buscarContaPorCpf(req, res) {
 }
 
 export async function buscarContas(req, res) {
-    const contasCadastro = await pool.query('SELECT * FROM users')
+    const contasCadastro = await pool.query('SELECT id, tipo, nome, cpf, saldo, tentativas_senha, bloqueado FROM users')
     return res.json(contasCadastro.rows)
 }
 

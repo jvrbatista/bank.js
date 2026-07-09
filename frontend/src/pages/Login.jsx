@@ -3,6 +3,7 @@ import {useState, useEffect} from 'react'
 import api from '../services/api.js'
 import ParticlesBackground from '../components/Particles.jsx'
 import { useNavigate } from 'react-router-dom'
+import { pegarToken, salvarToken  } from '../services/storage.js'
 
 export default function Login() {
     const [cpf, setCpf] = useState('')
@@ -14,7 +15,7 @@ export default function Login() {
         try {
         const resposta = await api.post('/loginUsuario', { cpf, senha })
         console.log(resposta.data)
-        sessionStorage.setItem('token', resposta.data.token)
+        salvarToken('usuario', resposta.data.token)
         setCpf('')
         setSenha('')
         navigate('/dashboard')
@@ -23,7 +24,7 @@ export default function Login() {
     }}
 
     useEffect(() => {
-        const token = sessionStorage.getItem('token')
+        const token = pegarToken('usuario')
         if (token) {
             navigate('/dashboard')
         }

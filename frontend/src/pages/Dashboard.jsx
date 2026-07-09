@@ -2,6 +2,7 @@ import logo from '../assets/logoBankJs.png'
 import { useState, useEffect } from 'react'
 import api from '../services/api.js'
 import { useNavigate } from 'react-router-dom'
+import { pegarToken, removerToken } from '../services/storage.js'    
 
 export default function Dashboard() {
     const [saldo, setSaldo] = useState(0)
@@ -9,13 +10,13 @@ export default function Dashboard() {
     const navigate = useNavigate()
 
     function handleSair() {
-        sessionStorage.clear()
+        const token = removerToken('usuario')
         navigate('/')
     }
     
     useEffect(() => {
         async function buscarSaldo() {
-            const token = sessionStorage.getItem('token')
+            const token = pegarToken('usuario')
             const resposta = await api.get('/saldo', {
                 headers: { Authorization: `Bearer ${token}` }
             })
@@ -24,7 +25,7 @@ export default function Dashboard() {
         buscarSaldo()
 
         async function buscarExtrato() {
-        const token = sessionStorage.getItem('token')
+        const token = pegarToken('usuario')
         const resposta = await api.get('/extratoUsuario', {
             headers: { Authorization: `Bearer ${token}` }
         })

@@ -2,19 +2,20 @@ import logo from '../assets/logoBankJs.png'
 import { useState, useEffect } from 'react'
 import api from '../services/api.js'
 import { useNavigate } from 'react-router-dom'
+import { pegarToken, removerToken } from '../services/storage.js'
 
 export default function Extrato() {
     const [extrato, setExtrato] = useState([])
     const navigate = useNavigate()
 
     function handleSair() {
-        sessionStorage.clear()
+        removerToken('usuario')
         navigate('/')
     }
     
     useEffect(() => {
         async function buscarExtrato() {
-            const token = sessionStorage.getItem('token')
+            const token = pegarToken('usuario')
             const resposta = await api.get('/extratoUsuario', {
                 headers: { Authorization: `Bearer ${token}` }
             })

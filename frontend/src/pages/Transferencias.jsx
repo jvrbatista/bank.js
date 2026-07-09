@@ -2,6 +2,7 @@ import logo from '../assets/logoBankJs.png'
 import { useState, useEffect } from 'react'
 import api from '../services/api.js'
 import { useNavigate } from 'react-router-dom'
+import { pegarToken, removerToken } from '../services/storage.js'
 
 
 export default function Transferencias() {
@@ -13,13 +14,13 @@ export default function Transferencias() {
     const [erro, setErro] = useState('')
 
     function handleSair() {
-        sessionStorage.clear()
+        removerToken('usuario')
         navigate('/')
     }
 
     useEffect(() => {
         async function carregar() {
-            const token = sessionStorage.getItem('token')
+            const token = pegarToken('usuario')
             const tokenDecodificado = JSON.parse(atob(token.split('.')[1]))
             const cpf = tokenDecodificado.cpf
             setCpfUsuario(cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'))
@@ -34,7 +35,7 @@ export default function Transferencias() {
 
     async function handleTransferir() {
         try {
-        const token = sessionStorage.getItem('token')
+        const token = pegarToken('usuario')
         const resposta = await api.post('/transferir', 
             { cpfDestino, valorTransferencia: valor },
             { headers: { Authorization: `Bearer ${token}` } }
