@@ -6,6 +6,7 @@ import Extrato from './pages/Extrato'
 import Transferencias from './pages/Transferencias'
 import RotaPrivada from './components/RotaPrivada'
 import LoginGestao from './pages/gestao/LoginGestao'
+import DashboardGestao from './pages/gestao/DashboardGestao'
 
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
                 <Route path="/extrato" element={<RotaPrivada><Extrato /></RotaPrivada>} />
                 <Route path="/transferencias" element={<RotaPrivada><Transferencias /></RotaPrivada>} />
                 <Route path="/gestao/login" element={<LoginGestao />} />
+                <Route path="/gestao/dashboard" element={<RotaPrivada  tipo = "gestor"><DashboardGestao /></RotaPrivada>} />
             </Routes>
         </BrowserRouter>
     )
