@@ -83,7 +83,7 @@ export default function DashboardGestao() {
                 </button>
             </div>
             <div className="flex-1 bg-black p-8">
-                <h2 className="text-white text-2xl font-bold mb-6">Dashboard</h2>
+                <h2 className="text-emerald-500 text-2xl font-bold mb-6">Dashboard</h2>
                 <div className="flex gap-4 mb-8">
 
                 </div>
