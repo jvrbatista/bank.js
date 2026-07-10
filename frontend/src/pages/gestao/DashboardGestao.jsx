@@ -6,6 +6,7 @@ import { pegarToken, removerToken } from '../../services/storage.js'
 
 export default function DashboardGestao() {
     const [contas, setContas] = useState([])
+    const [confirmando, setConfirmando] = useState(null)
     const navigate = useNavigate()
 
     function handleSair() {
@@ -25,8 +26,41 @@ export default function DashboardGestao() {
 
     }, []) 
 
+    async function handleBloquear(cpf) {
+        const token = pegarToken('gestor')
+        await api.put(`/gerente/bloquear/${cpf}`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+
+        setContas((contasAtuais) => contasAtuais.map((conta) => {
+            if (conta.cpf === cpf) {
+                return { ...conta, bloqueado: !conta.bloqueado }
+            } else {
+                return conta
+            }
+        }))
+        setConfirmando(null)
+    }
+
     return (
         <div className="flex min-h-screen bg-black">
+            {confirmando && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                    <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-80">
+                        <p className="text-white mb-6">
+                            Tem certeza que deseja {contas.find((conta) => conta.cpf === confirmando)?.bloqueado ? 'desbloquear' : 'bloquear'} esta conta?
+                        </p>
+                        <div className="flex gap-3">
+                            <button onClick={() => setConfirmando(null)} className="flex-1 bg-zinc-800 text-white rounded-xl px-4 py-2">
+                                Cancelar
+                            </button>
+                            <button onClick={() => handleBloquear(confirmando)} className="flex-1 bg-red-500 text-white rounded-xl px-4 py-2">
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="w-64 bg-zinc-900 p-6 flex flex-col">
                 <div className="flex items-center gap-3 mb-8">
                     <img src={logo} alt="BankJS" className="w-10 mix-blend-screen" />
@@ -76,7 +110,14 @@ export default function DashboardGestao() {
                             <td className="py-3 pr-4 text-gray-400">{conta.tipo}</td>
                             <td className="py-3 pr-4 text-white">R$ {Number(conta.saldo).toFixed(2).replace('.', ',')}</td>
                             <td className={`py-3 pr-4 font-semibold ${corStatus}`}>{status}</td>
-                            <td className="py-3">{}</td>
+                            <td className="py-3">
+                                <button
+                                    onClick={() => setConfirmando(conta.cpf)}
+                                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${conta.bloqueado ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'}`}
+                                >
+                                    {conta.bloqueado ? 'Desbloquear' : 'Bloquear'}
+                                </button>
+                            </td>
                             </tr>
                         )})}
                         </tbody>
