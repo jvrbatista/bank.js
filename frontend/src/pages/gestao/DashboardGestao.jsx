@@ -6,6 +6,7 @@ import { pegarToken, removerToken } from '../../services/storage.js'
 
 export default function DashboardGestao() {
     const [contas, setContas] = useState([])
+    const [busca, setBusca] = useState('')
     const [confirmando, setConfirmando] = useState(null)
     const navigate = useNavigate()
 
@@ -88,6 +89,12 @@ export default function DashboardGestao() {
                 </div>
                 <h2 className="text-white text-2xl font-bold mb-6">Contas cadastradas</h2>
                 <div className="bg-zinc-900 rounded-2xl p-6">
+                    <input
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
+                        placeholder="Buscar por CPF"
+                        className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-xl px-4 py-2 mb-4"
+                    />
                     <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
@@ -101,7 +108,7 @@ export default function DashboardGestao() {
                         </tr>
                         </thead>
                         <tbody>
-                        {contas.map((conta) => {
+                        {contas.filter((conta) => conta.cpf.includes(busca)).map((conta) => {
                             const status = conta.bloqueado ? 'Bloqueado' : 'Ativo'
                             const corStatus = conta.bloqueado ? 'text-red-400' : 'text-emerald-500'
                             return (<tr key={conta.cpf} className="border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors">
