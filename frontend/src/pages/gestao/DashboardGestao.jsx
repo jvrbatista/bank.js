@@ -1,11 +1,15 @@
-import logo from '../../assets/logoBankJs.png'
 import { useState, useEffect } from 'react'
 import api from '../../services/api.js'
 import { useNavigate } from 'react-router-dom'
 import { pegarToken, removerToken } from '../../services/storage.js'
+import Sidebar from '../../components/Sidebar.jsx'
 
 export default function DashboardGestao() {
     const [contas, setContas] = useState([])
+    const links = [
+        { href: '/gestao/dashboard', label: 'Dashboard', ativo: true },
+        { href: '/gestao/extrato', label: 'Extrato', ativo: false },
+    ]
     const [busca, setBusca] = useState('')
     const [confirmando, setConfirmando] = useState(null)
     const navigate = useNavigate()
@@ -62,29 +66,7 @@ export default function DashboardGestao() {
                     </div>
                 </div>
             )}
-            <div className="w-64 bg-zinc-900 p-6 flex flex-col">
-                <div className="flex items-center gap-3 mb-8">
-                    <img src={logo} alt="BankJS" className="w-10 mix-blend-screen" />
-                    <h1 className="text-white text-2xl font-bold tracking-widest">
-                        BANK<span className="text-emerald-500">JS</span>
-                    </h1>
-                </div>
-                <nav className="flex flex-col gap-2">
-                    <a href="/gestao/dashboard" className="flex items-center gap-3 text-emerald-500 bg-emerald-500/10 px-4 py-3 rounded-xl">
-                        Dashboard
-                    </a>
-                    <a href="/gestao/extrato" className="flex items-center gap-3 text-gray-400 hover:text-white px-4 py-3 rounded-xl">
-                        Extrato
-                    </a>
-                </nav>
-                <div className="mt-4 border-t border-zinc-700 pt-4 flex flex-col gap-2">
-                    <span className="text-gray-600 px-4 py-3"></span>
-
-                </div>
-                <button onClick={handleSair} className="flex items-center gap-3 text-gray-400 hover:text-white px-4 py-3 rounded-xl">
-                    Sair
-                </button>
-            </div>
+            <Sidebar links={links} onSair={handleSair} />
             <div className="flex-1 bg-black p-8">
                 <h2 className="text-emerald-500 text-2xl font-bold mb-6">Dashboard</h2>
                 <div className="flex gap-4 mb-8">
