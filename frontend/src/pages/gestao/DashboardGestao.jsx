@@ -73,6 +73,9 @@ export default function DashboardGestao() {
                     <a href="/gestao/dashboard" className="flex items-center gap-3 text-emerald-500 bg-emerald-500/10 px-4 py-3 rounded-xl">
                         Dashboard
                     </a>
+                    <a href="/gestao/extrato" className="flex items-center gap-3 text-gray-400 hover:text-white px-4 py-3 rounded-xl">
+                        Extrato
+                    </a>
                 </nav>
                 <div className="mt-4 border-t border-zinc-700 pt-4 flex flex-col gap-2">
                     <span className="text-gray-600 px-4 py-3"></span>

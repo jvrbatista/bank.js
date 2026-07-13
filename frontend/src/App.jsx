@@ -7,6 +7,7 @@ import Transferencias from './pages/Transferencias'
 import RotaPrivada from './components/RotaPrivada'
 import LoginGestao from './pages/gestao/LoginGestao'
 import DashboardGestao from './pages/gestao/DashboardGestao'
+import ExtratoUsuario from './pages/gestao/ExtratoUsuarios'
 
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
                 <Route path="/transferencias" element={<RotaPrivada><Transferencias /></RotaPrivada>} />
                 <Route path="/gestao/login" element={<LoginGestao />} />
                 <Route path="/gestao/dashboard" element={<RotaPrivada  tipo = "gestor"><DashboardGestao /></RotaPrivada>} />
+                <Route path="/gestao/extrato" element={<RotaPrivada  tipo = "gestor"><ExtratoUsuario /></RotaPrivada>} />
             </Routes>
         </BrowserRouter>
     )
