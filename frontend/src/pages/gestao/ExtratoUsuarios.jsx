@@ -15,7 +15,7 @@ export default function ExtratoUsuario() {
 
     function handleSair() {
         const token = removerToken('gestor')
-        navigate('/')
+        navigate('/gestao/login')
     }
     
     useEffect(() => {

@@ -47,9 +47,12 @@ export default function Configuracoes() {
         return (
         <div className="flex min-h-screen bg-black">
             <Sidebar links={links} onSair={handleSair} />
-            <div className="flex-1 bg-black p-8">
+            <div className="flex-1 bg-black p-8 flex flex-col">
                 <h2 className="text-white text-2xl font-bold mb-6">Configurações</h2>
-                <div className="bg-zinc-900 rounded-2xl p-6 max-w-md">
+                <div className="flex flex-col justify-center items-center flex-1">
+                <div className="w-full max-w-md">
+                    <h3 className="text-white text-xl font-bold mb-4">Alteração de <span className="text-emerald-500">senha</span></h3>
+                    <div className="bg-zinc-900 rounded-2xl p-6">
                     <p className="text-gray-400 mb-1">Senha atual</p>
                     <input
                         value={senhaAtual}
@@ -82,6 +85,8 @@ export default function Configuracoes() {
                     >
                         Trocar senha
                     </button>
+                    </div>
+                </div>
                 </div>
             </div>
         </div>
