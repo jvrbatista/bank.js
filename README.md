@@ -1,6 +1,6 @@
 # BankJS 🏦
 
-![Status](https://img.shields.io/badge/status-fase%2010%20completa-brightgreen)
+![Status](https://img.shields.io/badge/status-fase%2011%20completa-brightgreen)
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
 
@@ -46,11 +46,15 @@ O projeto evoluiu em fases — começou como um sistema de terminal em JavaScrip
 - Depósito, saque e transferência via PIX com validações de saldo
 - Extrato completo de transações com data/hora no fuso de Brasília
 - Consulta de saldo em tempo real
+- Troca de senha autenticada, com deslogamento automático após a alteração
 
-### Gestão *(backend pronto com tratamento de erros — frontend na Fase 11)*
+### Gestão
 - Cadastro de gestores com email corporativo obrigatório (`@bankjs.com.br`)
 - Autenticação separada com JWT próprio
 - Rotas administrativas protegidas por middleware específico
+- Dashboard com listagem de contas, busca por CPF e bloqueio/desbloqueio (com confirmação)
+- Extrato geral de todas as transações do banco, para auditoria
+- Sessão de usuário invalidada em tempo real ao ser bloqueado pela gestão (sem esperar o token expirar)
 
 ### Segurança
 - Senhas armazenadas com hash **bcrypt** — nunca em texto puro
@@ -164,15 +168,20 @@ npm run dev
 | POST | `/loginUsuario` | Login e geração de JWT | ❌ |
 | GET | `/saldo` | Consultar saldo | ✅ |
 | GET | `/extratoUsuario` | Listar transações | ✅ |
-| POST | `/depositar` | Realizar depósito | ✅ |
-| POST | `/sacar` | Realizar saque | ✅ |
+| POST | `/depositarUsuario` | Realizar depósito | ✅ |
+| POST | `/sacarUsuario` | Realizar saque | ✅ |
 | POST | `/transferir` | Transferência via PIX | ✅ |
+| PUT | `/trocarSenha` | Trocar a própria senha | ✅ |
 
 ### Gestão
 | Método | Rota | Descrição | Auth |
 |---|---|---|---|
 | POST | `/cadastroGestao` | Cadastrar gestor | ❌ |
 | POST | `/loginGestao` | Login de gestor | ❌ |
+| GET | `/gerente/contas` | Listar todas as contas de usuários | ✅ |
+| GET | `/gerente/contas/:cpf` | Buscar conta por CPF | ✅ |
+| GET | `/gerente/transacoes` | Listar todas as transações (auditoria) | ✅ |
+| PUT | `/gerente/bloquear/:cpf` | Bloquear/desbloquear conta | ✅ |
 
 > ✅ Requer header `Authorization: Bearer <token>`
 
@@ -190,7 +199,7 @@ npm run dev
 - ✅ **Fase 8** — Frontend React com 4 páginas funcionais
 - ✅ **Fase 9** — Refatoração MVC (routes/controllers)
 - ✅ **Fase 10** — Tratamento de erros robusto (status codes HTTP, asyncHandler, middleware de erro central, correção de bug de segurança no bloqueio por tentativas)
-- ⏳ **Fase 11** — Área de gestão no frontend + novas features
+- ✅ **Fase 11** — Área de gestão no frontend (dashboard, extrato geral, bloqueio de contas), sidebar compartilhada entre telas, troca de senha do usuário, e invalidação de sessão em tempo real ao bloquear uma conta
 
 ---
 

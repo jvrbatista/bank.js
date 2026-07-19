@@ -31,7 +31,6 @@ export default function Configuracoes() {
                 { senhaAtual, novaSenha },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
-                console.log(resposta.data)
                 setSucesso(resposta.data.mensagem)
                 setTimeout(() => {
                 removerToken('usuario')
