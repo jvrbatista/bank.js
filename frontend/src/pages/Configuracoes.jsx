@@ -33,6 +33,10 @@ export default function Configuracoes() {
             )
                 console.log(resposta.data)
                 setSucesso(resposta.data.mensagem)
+                setTimeout(() => {
+                removerToken('usuario')
+                navigate('/')
+            }, 1500)
             } catch (error) {
                 setErro(error.response?.data?.erro || 'Erro ao conectar com o servidor')
             }
