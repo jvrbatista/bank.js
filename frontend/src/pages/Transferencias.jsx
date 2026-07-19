@@ -67,7 +67,9 @@ export default function Transferencias() {
                     <span className="text-gray-600 px-4 py-3">Investimentos</span>
                     <span className="text-gray-600 px-4 py-3">Empréstimos</span>
                     <span className="text-gray-600 px-4 py-3">Seguros</span>
-                    <span className="text-gray-600 px-4 py-3">Configurações</span>
+                    <a href="/configuracoes" className="flex items-center gap-3 text-gray-400 hover:text-white px-4 py-3 rounded-xl">
+                        Configurações
+                    </a>
                 </div>
                 <button onClick={handleSair} className="flex items-center gap-3 text-gray-400 hover:text-white px-4 py-3 rounded-xl">
                     Sair

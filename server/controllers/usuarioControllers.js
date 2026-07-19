@@ -61,6 +61,29 @@ export async function cadastroUsuario(req, res) {
     res.json({ mensagem: `Usuário cadastrado com sucesso!`})
 }
 
+export async function trocarSenha(req, res) {
+    const cpf = req.cpf
+    const{senhaAtual, novaSenha} = req.body
+    const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
+    
+    if (usuario.rows.length === 0) {
+        return res.status(404).json({ erro: 'Usuário não encontrado!' })
+    }
+
+    const validacaoSenha = await bcrypt.compare(senhaAtual, usuario.rows[0].senha)
+    if (!validacaoSenha) {
+        return res.status(401).json({ erro: 'Senha inválida!'})
+    }
+
+    const senhaHash = await bcrypt.hash(novaSenha, 10)
+    await pool.query('UPDATE users SET senha = $1 WHERE cpf = $2', [senhaHash, usuario.rows[0].cpf])
+
+    res.json({
+        cpf: cpf,
+        mensagem: `Senha alterada com sucesso!`
+    })
+}
+
 export async function saldo(req, res) {
     const cpf = req.cpf
     const usuario = await pool.query('SELECT * FROM users WHERE cpf = $1', [cpf])
